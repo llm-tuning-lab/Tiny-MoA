@@ -5,29 +5,31 @@ Brain과 Specialist를 조율하여 사용자 요청 처리
 Tool Calling 지원 추가
 """
 
+import re
 import sys
+import threading
 from pathlib import Path
 from typing import Optional
+
 from rich.console import Console
-from rich.panel import Panel
-from rich.markdown import Markdown
 from rich.json import JSON
-import re
-import threading
+from rich.markdown import Markdown
+from rich.panel import Panel
 
 # 프로젝트 루트를 PYTHONPATH에 추가
 project_root = Path(__file__).parent.parent
 if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
+import logging
+
 from tiny_moa.brain import Brain
 from tiny_moa.reasoner import Reasoner
-import logging
 
 # 번역 모듈 import
 try:
-    from translation.pipeline import TranslationPipeline
     from translation.detector import detect_language
+    from translation.pipeline import TranslationPipeline
     TRANSLATION_AVAILABLE = True
 except ImportError:
     TRANSLATION_AVAILABLE = False
@@ -400,7 +402,7 @@ Return ONLY the JSON arguments (e.g. {{"location": "Seoul"}} or {{"command": "py
                         if verbose:
                             console.print(Panel(
                                 JSON.from_data(retry_result),
-                                title=f"[bold cyan]🔧 재시도 결과[/bold cyan]",
+                                title="[bold cyan]🔧 재시도 결과[/bold cyan]",
                                 border_style="cyan" if retry_result.get("success") else "red",
                             ))
                             
@@ -857,18 +859,19 @@ Return ONLY the JSON arguments (e.g. {{"location": "Seoul"}} or {{"command": "py
         """
         Tiny Cowork v2.0 실행 (TUI & Parallel 지원)
         """
-        from tiny_moa.cowork.workspace import WorkspaceContext
-        from tiny_moa.cowork.task_queue import TaskQueue, TaskStatus
+        from rich.live import Live
+
+        from tiny_moa.cowork.parallel_runner import ParallelRunner
         from tiny_moa.cowork.planner import PlannerAgent
         from tiny_moa.cowork.skills.file_skills import CoworkFileSkill
-        from tiny_moa.ui.dashboard import CoworkDashboard
-        from tiny_moa.cowork.parallel_runner import ParallelRunner
-        from tiny_moa.cowork.workers.researcher import ResearchWorker
-        from tiny_moa.cowork.workers.writer import WriterWorker
+        from tiny_moa.cowork.task_queue import TaskQueue, TaskStatus
         from tiny_moa.cowork.workers.brain_worker import BrainWorker
-        from tiny_moa.cowork.workers.tool_worker import ToolWorker
         from tiny_moa.cowork.workers.office_worker import OfficeWorker
-        from rich.live import Live
+        from tiny_moa.cowork.workers.researcher import ResearchWorker
+        from tiny_moa.cowork.workers.tool_worker import ToolWorker
+        from tiny_moa.cowork.workers.writer import WriterWorker
+        from tiny_moa.cowork.workspace import WorkspaceContext
+        from tiny_moa.ui.dashboard import CoworkDashboard
 
         # [Fix] Keep reference to handler for cleanup
         logger, log_handler = self._setup_cowork_logger()
@@ -889,7 +892,7 @@ Return ONLY the JSON arguments (e.g. {{"location": "Seoul"}} or {{"command": "py
         if rag_context:
              logger.info(f"RAG Context extracted ({len(rag_context)} chars)")
              if use_tui:
-                 dashboard.add_log(f"RAG Context attached from files.", "System")
+                 dashboard.add_log("RAG Context attached from files.", "System")
 
 
 
@@ -954,7 +957,7 @@ Return ONLY the JSON arguments (e.g. {{"location": "Seoul"}} or {{"command": "py
             if bypass_llm_planner:
                 dashboard.add_log(f"Intelligent bypass enabled (Route: {route}).", "System")
             else:
-                dashboard.add_log(f"Complex task detected. Using LLM Planner.", "System")
+                dashboard.add_log("Complex task detected. Using LLM Planner.", "System")
             live.update(dashboard.generate_layout())
         
         try:
@@ -1252,7 +1255,7 @@ Return ONLY the JSON arguments (e.g. {{"location": "Seoul"}} or {{"command": "py
             try:
                 write_msg = workspace.write_file("docs/cowork_result.md", final_report)
                 logger.info(f"Auto-save result: {write_msg}")
-                console.print(f"\n[green]ℹ️ 작업 결과가 저장되었습니다: docs/cowork_result.md[/green]")
+                console.print("\n[green]ℹ️ 작업 결과가 저장되었습니다: docs/cowork_result.md[/green]")
             except Exception as e:
                 logger.error(f"Failed to auto-save cowork_result.md: {e}")
 

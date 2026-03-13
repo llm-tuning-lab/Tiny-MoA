@@ -5,7 +5,6 @@ Language Detector
 """
 
 import re
-from typing import Optional
 
 # 언어 코드 매핑
 LANGUAGE_NAMES = {
@@ -40,7 +39,7 @@ def detect_language(text: str) -> str:
     
     # 1. langdetect 사용 시도 (정확도 높음)
     try:
-        from langdetect import detect, DetectorFactory
+        from langdetect import DetectorFactory, detect
         # 일관된 결과를 위해 시드 설정
         DetectorFactory.seed = 0
         detected = detect(text)

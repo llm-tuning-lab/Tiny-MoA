@@ -1,5 +1,7 @@
-from src.tiny_moa.cowork.workers.base import BaseWorker
 import re
+
+from src.tiny_moa.cowork.workers.base import BaseWorker
+
 
 class WriterWorker(BaseWorker):
     def __init__(self, name: str, logger, brain, file_skill):

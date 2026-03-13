@@ -6,11 +6,10 @@ Falcon-H1-Tiny-Tool-Calling-90M + LFM2.5 검증 파이프라인
 
 import json
 import os
-import re
 from pathlib import Path
 from typing import Optional
 
-from .schema import TOOLS, get_tools_prompt, validate_tool_call
+from .schema import get_tools_prompt, validate_tool_call
 
 
 class ToolCaller:
@@ -84,7 +83,7 @@ class ToolCaller:
             verbose=False,
         )
         
-        print(f"[ToolCaller] Loaded! (90M params, Q8_0)")
+        print("[ToolCaller] Loaded! (90M params, Q8_0)")
     
     @property
     def falcon(self):

@@ -5,23 +5,21 @@ PDF/DOCX 문서를 텍스트로 변환하여 Brain에게 전달
 """
 
 import logging
-import os
 from pathlib import Path
-from typing import Optional
 
 # Docling imports
 try:
-    from docling.document_converter import (
-        DocumentConverter,
-        PdfFormatOption,
-        WordFormatOption,
-        PowerpointFormatOption,
-        HTMLFormatOption,
-        ImageFormatOption
-    )
+    from docling.backend.pypdfium2_backend import PyPdfiumDocumentBackend
     from docling.datamodel.base_models import InputFormat
     from docling.datamodel.pipeline_options import PdfPipelineOptions, TableFormerMode
-    from docling.backend.pypdfium2_backend import PyPdfiumDocumentBackend
+    from docling.document_converter import (
+        DocumentConverter,
+        HTMLFormatOption,
+        ImageFormatOption,
+        PdfFormatOption,
+        PowerpointFormatOption,
+        WordFormatOption,
+    )
     DOCLING_AVAILABLE = True
 except ImportError:
     DOCLING_AVAILABLE = False

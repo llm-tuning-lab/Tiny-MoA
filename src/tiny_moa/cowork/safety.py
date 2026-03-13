@@ -5,9 +5,9 @@ Tiny Cowork 시스템의 안전 장치.
 파일 삭제, 포맷 등 파괴적인 동작을 감지하고 차단하거나 사용자 확인을 요청합니다.
 """
 
-import os
 from pathlib import Path
 from typing import Tuple
+
 
 class SafetyGuard:
     """파괴적 동작 방지 및 샌드박스 검증"""

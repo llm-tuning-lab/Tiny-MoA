@@ -5,18 +5,20 @@ Tool Executor
 """
 
 import json
+import re
 from datetime import datetime
 from typing import Any, Callable
 from zoneinfo import ZoneInfo
-import re
+
 
 # 개별 도구 함수들
 def get_weather(location: str, unit: str = "celsius", **kwargs) -> dict[str, Any]:
     """
     날씨 정보 조회 (wttr.in API - 무료, API 키 불필요)
     """
-    import requests
     import time
+
+    import requests
     
     try:
         # wttr.in API 호출 (JSON 형식)
@@ -108,7 +110,6 @@ def search_web(query: str, num_results: int = 5, **kwargs) -> dict[str, Any]:
     DuckDuckGo 웹 검색 - API 키 불필요!
     """
     from duckduckgo_search import DDGS
-    import re
     
     # [Fix] 한국어 쿼리인 경우 'kr-kr' 리전 강제 사용
     # 중국어 스팸 방지 및 한국어 결과 우선
@@ -196,7 +197,6 @@ def search_news(query: str, num_results: int = 5, **kwargs) -> dict[str, Any]:
     DuckDuckGo 뉴스 검색
     """
     from duckduckgo_search import DDGS
-    import re
     
     # [Fix] 뉴스 검색도 언어 감지 적용
     region = "us-en"
@@ -246,8 +246,9 @@ def search_wikipedia(query: str, lang: str = "en", **kwargs) -> dict[str, Any]:
     """
     Wikipedia 검색 - API 키 불필요!
     """
-    import requests
     import urllib.parse
+
+    import requests
     
     encoded_query = urllib.parse.quote(query)
     url = f"https://{lang}.wikipedia.org/api/rest_v1/page/summary/{encoded_query}"
@@ -272,9 +273,9 @@ def read_url(url: str, max_chars: int = 2000, **kwargs) -> dict[str, Any]:
     """
     URL 내용 읽기 - 웹페이지 텍스트 추출
     """
-    import requests
     from html import unescape
-    import re
+
+    import requests
     
     try:
         response = requests.get(
@@ -308,8 +309,8 @@ def execute_command(command: str, timeout: int = 30, **kwargs) -> dict[str, Any]
     
     주의: 보안상 위험할 수 있음. 신뢰할 수 있는 명령만 실행.
     """
-    import subprocess
     import platform
+    import subprocess
     
     # 위험한 명령어 차단
     dangerous_patterns = [

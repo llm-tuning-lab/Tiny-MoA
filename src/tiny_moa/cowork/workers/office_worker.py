@@ -5,8 +5,9 @@ Brain이 내용을 생성하고 Office 도구를 호출하는 전문 Worker
 """
 
 import json
-import re
 import os
+import re
+
 from src.tiny_moa.cowork.workers.base import BaseWorker
 
 # [Gemini-Claw Style] Senior Consultant Persona

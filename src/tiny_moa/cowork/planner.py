@@ -6,8 +6,9 @@ Brain 모델을 사용하여 JSON 형식의 계획을 생성합니다.
 """
 
 from typing import List
+
 from src.tiny_moa.brain import Brain
-from src.tiny_moa.cowork.task_queue import CoworkTask, TaskQueue
+
 
 class PlannerAgent:
     def __init__(self, brain: Brain):
@@ -91,7 +92,6 @@ Return ONLY the JSON list. No markdown."""
         
         # Clean up response
         import json
-        import re
         
         try:
             # Markdown block removal

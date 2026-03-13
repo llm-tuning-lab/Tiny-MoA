@@ -5,9 +5,10 @@ Parallel Task Runner
 """
 
 import concurrent.futures
-from typing import List, Callable, Dict, Any, Optional
-from dataclasses import dataclass
 import threading
+from dataclasses import dataclass
+from typing import Any, Callable, Dict, List, Optional
+
 
 @dataclass
 class TaskResult:

@@ -1,6 +1,6 @@
-from abc import ABC, abstractmethod
-from typing import Any, Dict, List
 import logging
+from abc import ABC, abstractmethod
+
 
 class BaseWorker(ABC):
     def __init__(self, name: str, logger: logging.Logger):

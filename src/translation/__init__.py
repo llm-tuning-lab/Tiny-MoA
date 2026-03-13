@@ -5,8 +5,8 @@ Translation Module
 """
 
 from .detector import detect_language, is_english
-from .translator import GoogleTranslator
 from .pipeline import TranslationPipeline
+from .translator import GoogleTranslator
 
 __all__ = [
     "detect_language",

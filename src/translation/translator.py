@@ -5,8 +5,8 @@ Google Translate API 래퍼 (무료 버전 - googletrans)
 """
 
 import logging
-from typing import Optional, List
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from typing import List
 
 logger = logging.getLogger(__name__)
 

@@ -1,6 +1,7 @@
 import re
-from pathlib import Path
+
 from src.tiny_moa.cowork.workers.base import BaseWorker
+
 
 class ResearchWorker(BaseWorker):
     def __init__(self, name: str, logger, orchestrator):

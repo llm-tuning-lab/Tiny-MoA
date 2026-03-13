@@ -6,9 +6,9 @@ Translation Pipeline
 
 import logging
 from dataclasses import dataclass
-from typing import Optional, Callable
+from typing import Callable
 
-from .detector import detect_language, is_english
+from .detector import detect_language
 from .translator import create_translator
 
 logger = logging.getLogger(__name__)

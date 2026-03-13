@@ -1,5 +1,6 @@
 from src.tiny_moa.cowork.workers.base import BaseWorker
 
+
 class ToolWorker(BaseWorker):
     def __init__(self, name: str, logger, orchestrator):
         super().__init__(name, logger)

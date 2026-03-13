@@ -4,15 +4,15 @@ RAG Engine
 Orchestrates Document Processing (Docling) -> Embedding (Chroma) -> Retrieval
 """
 
-import os
+import hashlib
 from pathlib import Path
 from typing import List
 
-# Internal imports (Lazy loaded components)
-from src.rag.store import LazyVectorStore
 from src.doc_processing.converter import DoclingConverter
 
-import hashlib
+# Internal imports (Lazy loaded components)
+from src.rag.store import LazyVectorStore
+
 
 class RAGEngine:
     def __init__(self):

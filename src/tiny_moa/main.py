@@ -6,7 +6,6 @@ python -m tiny_moa.main [--interactive]
 
 import argparse
 import warnings
-import sys
 
 # Suppress ResourceWarning: unclosed file <_io.TextIOWrapper ...>
 warnings.filterwarnings("ignore", category=ResourceWarning)
@@ -15,10 +14,11 @@ warnings.filterwarnings("ignore", message=r"unclosed file <_io.TextIOWrapper nam
 # Catch-all for cp949 encoding issue often seen on Korean Windows
 warnings.filterwarnings("ignore", message=r".*cp949.*", category=ResourceWarning)
 
-from tiny_moa.orchestrator import TinyMoA, interactive_mode
 from rich.console import Console
-from rich.panel import Panel
 from rich.markdown import Markdown
+from rich.panel import Panel
+
+from tiny_moa.orchestrator import TinyMoA, interactive_mode
 
 console = Console()
 

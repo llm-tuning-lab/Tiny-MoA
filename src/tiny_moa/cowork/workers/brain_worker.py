@@ -1,5 +1,6 @@
 from src.tiny_moa.cowork.workers.base import BaseWorker
 
+
 class BrainWorker(BaseWorker):
     def __init__(self, name: str, logger, brain):
         super().__init__(name, logger)

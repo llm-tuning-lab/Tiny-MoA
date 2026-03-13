@@ -4,10 +4,11 @@ Workspace Context
 에이전트가 작업하는 파일 시스템 공간(Sandbox) 관리.
 """
 
-import os
 from pathlib import Path
-from typing import List, Optional
+from typing import List
+
 from src.tiny_moa.cowork.safety import SafetyGuard
+
 
 class WorkspaceContext:
     """사용자가 지정한 폴더의 파일 접근 관리 (Sandbox)"""

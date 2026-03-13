@@ -7,13 +7,14 @@ Brain 모델 래퍼 (LiquidAI LFM2.5-1.2B)
 - 결과 통합
 """
 
+import logging
 import os
 import re
 from pathlib import Path
 from typing import List, Optional
+
 from llama_cpp import Llama
-import sys
-import logging
+
 # Lazy import for translator
 # from deep_translator import GoogleTranslator 
 
@@ -512,7 +513,7 @@ class Brain:
                     
                     # [CRITICAL] stdout/stderr는 기술적 데이터이므로 번역하면 안됨!
                     # 파일명, 폴더명, 명령어 결과는 그대로 유지
-                    cmd_block = f"### 💻 **Command Result**\n"
+                    cmd_block = "### 💻 **Command Result**\n"
                     cmd_block += f"```\n$ {cmd}\n```\n"
                     
                     if stdout:

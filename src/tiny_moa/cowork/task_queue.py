@@ -4,11 +4,11 @@ Task Queue System
 비동기 태스크 관리 및 상태 추적.
 """
 
+import uuid
 from dataclasses import dataclass, field
 from enum import Enum
-from queue import Queue
-from typing import List, Optional
-import uuid
+from typing import List
+
 
 class TaskStatus(Enum):
     PENDING = "pending"

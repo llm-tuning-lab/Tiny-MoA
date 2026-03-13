@@ -5,8 +5,8 @@ Lazy loading wrapper for ChromaDB to minimize startup overhead.
 """
 
 import logging
-from typing import Optional, Any
 from pathlib import Path
+
 
 class LazyVectorStore:
     """
@@ -34,8 +34,8 @@ class LazyVectorStore:
                 np.float_ = np.float64
             
             import chromadb
-            from chromadb.utils import embedding_functions
             from chromadb.config import Settings
+            from chromadb.utils import embedding_functions
             
             # Persistent Client (데이터 저장)
             db_path = Path("rag_storage")

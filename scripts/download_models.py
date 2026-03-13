@@ -4,9 +4,6 @@
 huggingface-cli를 사용하여 GGUF 모델 다운로드
 """
 
-import subprocess
-import sys
-from pathlib import Path
 
 # 모델 정보
 MODELS = {
