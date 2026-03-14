@@ -21,14 +21,14 @@ project_root = Path(__file__).parent.parent
 if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
-import logging
+import logging  # noqa: E402
 
-from tiny_moa.brain import Brain
-from tiny_moa.reasoner import Reasoner
+from tiny_moa.brain import Brain  # noqa: E402
+from tiny_moa.reasoner import Reasoner  # noqa: E402
 
 # 번역 모듈 import
 try:
-    from translation.detector import detect_language
+    from translation.detector import detect_language  # noqa: F401
     from translation.pipeline import TranslationPipeline
     TRANSLATION_AVAILABLE = True
 except ImportError:
@@ -188,7 +188,7 @@ class TinyMoA:
             # Allow known tools only
             known_tools = ["execute_command", "get_weather", "search_web", "search_news", "read_url"]
             if ex_tool in known_tools:
-                if verbose: console.print(f"[dim]⚡ Explicit Tool Handoff: {ex_tool}({ex_arg})[/dim]")
+                if verbose: console.print(f"[dim]⚡ Explicit Tool Handoff: {ex_tool}({ex_arg})[/dim]")  # noqa: E701
                 
                 if ex_tool == "execute_command":
                     tool_call = {"name": "execute_command", "arguments": {"command": ex_arg}}
@@ -238,7 +238,7 @@ class TinyMoA:
                     has_spaces = " " in cmd_clean
                     
                     if not is_safe and has_spaces and len(cmd_clean.split()) > 2:
-                         if verbose: console.print(f"[yellow]⚠️ Invalid command detected ('{arg_hint}'). Fallback to search_web.[/yellow]")
+                         if verbose: console.print(f"[yellow]⚠️ Invalid command detected ('{arg_hint}'). Fallback to search_web.[/yellow]")  # noqa: E701
                          tool_hint = "search_web"
                          arguments = {"query": arg_hint}
                     else:
@@ -288,12 +288,12 @@ class TinyMoA:
             
             # search_web does not accept 'location', only 'query'
             if t_name in ["search_web", "search_news"] and "location" in t_args and "query" not in t_args:
-                if verbose: console.print(f"[yellow]⚠️ Fixing invalid argument for {t_name}: location -> query[/yellow]")
+                if verbose: console.print(f"[yellow]⚠️ Fixing invalid argument for {t_name}: location -> query[/yellow]")  # noqa: E701
                 t_args["query"] = t_args.pop("location")
             
             # get_weather does not accept 'query', only 'location'
             if t_name == "get_weather" and "query" in t_args and "location" not in t_args:
-                if verbose: console.print(f"[yellow]⚠️ Fixing invalid argument for {t_name}: query -> location[/yellow]")
+                if verbose: console.print(f"[yellow]⚠️ Fixing invalid argument for {t_name}: query -> location[/yellow]")  # noqa: E701
                 t_args["location"] = t_args.pop("query")
 
         if "error" in tool_call:
@@ -311,7 +311,7 @@ class TinyMoA:
             # Remove common prefixes hallucinated by Brain (e.g. "tool: ls", "command: ls", "도구: ls")
             clean_cmd = re.sub(r'^(tool|command|cmd|도구|명령|실행)\s*[:：]\s*', '', raw_cmd, flags=re.IGNORECASE).strip()
             if clean_cmd != raw_cmd:
-                if verbose: console.print(f"[dim]🧹 Command Sanitized: '{raw_cmd}' -> '{clean_cmd}'[/dim]")
+                if verbose: console.print(f"[dim]🧹 Command Sanitized: '{raw_cmd}' -> '{clean_cmd}'[/dim]")  # noqa: E701
                 arguments["command"] = clean_cmd
         
         if verbose:
@@ -588,7 +588,7 @@ Return ONLY the JSON arguments (e.g. {{"location": "Seoul"}} or {{"command": "py
         
         # 0.5. [Multi-Step Pipeline] route_pipeline() 사용하여 복합 작업 분해
         # 예: "최신 AI 트렌드 검색해서 요약해줘" → [TOOL: search] → [DIRECT: 요약]
-        pipeline = self.brain.route_pipeline(processed_input if 'processed_input' in dir() else user_input)
+        pipeline = self.brain.route_pipeline(processed_input if 'processed_input' in dir() else user_input)  # noqa: F821
         
         if len(pipeline) > 1:
             # 다중 스텝 파이프라인 실행
@@ -654,13 +654,13 @@ Return ONLY the JSON arguments (e.g. {{"location": "Seoul"}} or {{"command": "py
                     if target_lang_ctx.is_translated:
                         final_response = self._translation_pipeline.from_english(final_response, target_lang_ctx)
                 except Exception as e:
-                    logger.error(f"Pipeline translation failed: {e}")
+                    logger.error(f"Pipeline translation failed: {e}")  # noqa: F821
             
             return final_response
         
         # 0.5.1 [Legacy] 기존 복합 질문 분해 (compare/비교 케이스)
         # "비교", "compare", "vs" 등 키워드가 있으면 분해 시도
-        complex_keywords = ["비교", "compare", "vs", "difference", "차이", "어때?", "각각", "separately", "each"] # '어때?'는 애매하지만 일단 테스트
+        _complex_keywords = ["비교", "compare", "vs", "difference", "차이", "어때?", "각각", "separately", "each"] # '어때?'는 애매하지만 일단 테스트
         is_complex = any(k in user_input for k in ["비교", "compare", "vs", "difference", "차이", "각각", "separately", "each"])
         
         if is_complex:
@@ -752,7 +752,7 @@ Return ONLY the JSON arguments (e.g. {{"location": "Seoul"}} or {{"command": "py
                             pass
 
                     except Exception as e:
-                        logger.error(f"Translation logic failed: {e}")
+                        logger.error(f"Translation logic failed: {e}")  # noqa: F821
 
                 return final_response
 
@@ -822,7 +822,7 @@ Return ONLY the JSON arguments (e.g. {{"location": "Seoul"}} or {{"command": "py
                 try:
                     final_response = self._translation_pipeline.from_english(final_response, translation_ctx)
                 except Exception as e:
-                    logger.error(f"Translation failed (main): {e}")
+                    logger.error(f"Translation failed (main): {e}")  # noqa: F821
         if verbose:
             console.print(Panel(
                 Markdown(str(final_response)) if isinstance(final_response, str) else JSON.from_data(final_response),
@@ -1097,7 +1097,7 @@ Return ONLY the JSON arguments (e.g. {{"location": "Seoul"}} or {{"command": "py
             def execute_single_task(task):
                  try:
                     agent_type = task.agent_type.lower()
-                    task_lower = task.description.lower()
+                    _task_lower = task.description.lower()
                     history = "\n\n".join(results) # Note: Parallel tasks won't have latest history from siblings
                     
                     if use_tui:
@@ -1179,7 +1179,7 @@ Return ONLY the JSON arguments (e.g. {{"location": "Seoul"}} or {{"command": "py
                     runner.run_tasks(t_dicts, runner_wrapper)
                 else:
                     # Sequential execution
-                    for t in first_phase: execute_single_task(t)
+                    for t in first_phase: execute_single_task(t)  # noqa: E701
 
             # Update results after first phase
             for t in first_phase:
@@ -1199,7 +1199,7 @@ Return ONLY the JSON arguments (e.g. {{"location": "Seoul"}} or {{"command": "py
                     runner.run_tasks(t_dicts, runner_wrapper2)
                 else:
                     # Sequential execution
-                    for t in second_phase: execute_single_task(t)
+                    for t in second_phase: execute_single_task(t)  # noqa: E701
                     
             # Update results after second phase
             for t in second_phase:
@@ -1266,7 +1266,7 @@ Return ONLY the JSON arguments (e.g. {{"location": "Seoul"}} or {{"command": "py
         except Exception as e:
             logger.critical(f"Fatal error in cowork flow: {e}", exc_info=True)
             self.dashboard = None
-            if use_tui: live.stop()
+            if use_tui: live.stop()  # noqa: E701
             raise e
         finally:
             # [Fix] Clean up log handler

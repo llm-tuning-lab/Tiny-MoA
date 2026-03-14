@@ -15,7 +15,7 @@ try:
     from docling.document_converter import (
         DocumentConverter,
         HTMLFormatOption,
-        ImageFormatOption,
+        ImageFormatOption,  # noqa: F401
         PdfFormatOption,
         PowerpointFormatOption,
         WordFormatOption,

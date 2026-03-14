@@ -94,7 +94,7 @@ class RAGEngine:
         
         for para in paragraphs:
             para = para.strip()
-            if not para: continue
+            if not para: continue  # noqa: E701
             
             # If a single paragraph is huge, split it blindly (fallback)
             if len(para) > chunk_size:

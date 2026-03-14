@@ -14,11 +14,11 @@ warnings.filterwarnings("ignore", message=r"unclosed file <_io.TextIOWrapper nam
 # Catch-all for cp949 encoding issue often seen on Korean Windows
 warnings.filterwarnings("ignore", message=r".*cp949.*", category=ResourceWarning)
 
-from rich.console import Console
-from rich.markdown import Markdown
-from rich.panel import Panel
+from rich.console import Console  # noqa: E402
+from rich.markdown import Markdown  # noqa: E402
+from rich.panel import Panel  # noqa: E402
 
-from tiny_moa.orchestrator import TinyMoA, interactive_mode
+from tiny_moa.orchestrator import TinyMoA, interactive_mode  # noqa: E402
 
 console = Console()
 

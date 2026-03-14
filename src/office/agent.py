@@ -92,7 +92,7 @@ class OfficeAgent:
                     len(str(col))
                 ) + 2
                 worksheet.column_dimensions[get_column_letter(idx + 1)].width = min(max_len, 50)
-            except:
+            except Exception:
                 pass
             
             cell = worksheet.cell(row=1, column=idx + 1)

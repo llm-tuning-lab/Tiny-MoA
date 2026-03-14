@@ -418,7 +418,7 @@ class Brain:
                         try:
                             data = eval(data_str)
                             sections.append(data)
-                        except:
+                        except Exception:
                             # If not a valid python dict/json, treat as plain text
                             # (e.g. Brain summary output)
                             if data_str:
@@ -429,14 +429,14 @@ class Brain:
                     data = eval(specialist_output) if "{" in specialist_output else {}
                     if isinstance(data, dict):
                          sections.append(data)
-                except:
+                except Exception:
                     # Treat entire output as text if not JSON
                     sections.append({"type": "text", "content": specialist_output})
 
             # [Deterministic Formatting]
             final_formatted_blocks = []
             for data in sections:
-                if not isinstance(data, dict): continue
+                if not isinstance(data, dict): continue  # noqa: E701
                 
                 # Check for plain text wrapper (Brain Summary)
                 if data.get("type") == "text" and "content" in data:
@@ -451,7 +451,7 @@ class Brain:
                 # Unwrap 'result' if present (Cowork Tool Result wrapper)
                 # {'success': True, 'tool': 'search_news', 'result': {'results': [...]}}
                 inner = data.get("result", data) 
-                if not isinstance(inner, dict): inner = data # Fallback
+                if not isinstance(inner, dict): inner = data # Fallback  # noqa: E701
 
                 # 1. Search/News Results
                 # Check both 'results' (direct) and 'inner["results"]'
@@ -612,7 +612,7 @@ Your goal is to nicely format the provided data into a readable list.
 
             # [Safety Fix] Programmatically append Search/News results to ensure they appear
             # The 1.2B model often hallucinates or skips this data. We force-feed it here.
-            appendix = []
+            _appendix = []
             direct_references = [] # To store formatted references
             
             # Iterate through the parsed sections to find search results
@@ -708,7 +708,7 @@ Your goal is to nicely format the provided data into a readable list.
 
         for part in parts:
             clean_part = part.strip().strip("?.!,")
-            if not clean_part: continue
+            if not clean_part: continue  # noqa: E701
             
             # Tokenize & POS Tag
             try:
