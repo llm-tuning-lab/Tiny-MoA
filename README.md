@@ -243,6 +243,63 @@ Tiny-MoA/
 
 ---
 
+## 📚 설치 가이드
+
+### 사전 요구사항
+
+- **Python**: 3.10 이상
+- **RAM**: 16GB 이상 (CPU 전용 실행)
+- **디스크**: 5GB 이상 (모델 다운로드용)
+- **huggingface-cli**: 모델 다운로드용
+
+### 1. 저장소 클론
+
+```bash
+git clone https://github.com/gyunggyung/Tiny-MoA.git
+cd Tiny-MoA
+```
+
+### 2. uv 설치 (권장)
+
+```powershell
+# Windows PowerShell
+powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
+
+# macOS/Linux
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# 설치 확인
+uv --version
+```
+
+### 3. 의존성 설치
+
+```bash
+# uv로 환경 설정 (권장)
+uv sync
+
+# 또는 pip 사용
+pip install -r requirements.txt
+```
+
+### 4. 모델 다운로드
+
+```bash
+# Brain (LFM2.5-1.2B-Thinking)
+huggingface-cli download LiquidAI/LFM2.5-1.2B-Thinking-GGUF \
+    --include "*Q4_K_M.gguf" --local-dir ./models/brain
+
+# Reasoner (Falcon-R-0.6B)
+huggingface-cli download tiiuae/Falcon-H1-Tiny-R-0.6B-GGUF \
+    --include "*Q4_K_M.gguf" --local-dir ./models/reasoner
+
+# Tool Caller (Falcon-Tool-Calling-90M)
+huggingface-cli download tiiuae/Falcon-H1-Tiny-Tool-Calling-90M-GGUF \
+    --include "*Q4_K_M.gguf" --local-dir ./models/tool_caller
+```
+
+---
+
 ## 📚 API 문서
 
 ### 핵심 모듈
@@ -280,6 +337,21 @@ intent = brain.analyze_intent("What's the weather in Seoul?")
 # Tool 실행
 executor = ToolExecutor()
 result = executor.execute("get_weather", {"location": "Seoul"})
+```
+
+### 환경 변수
+
+```bash
+# 모델 경로 (선택)
+BRAIN_MODEL_PATH=./models/brain/model.gguf
+REASONER_MODEL_PATH=./models/reasoner/model.gguf
+TOOL_CALLER_MODEL_PATH=./models/tool_caller/model.gguf
+
+# 컨텍스트 길이 (선택)
+N_CTX=8192
+
+# 로깅 레벨 (선택)
+LOG_LEVEL=INFO
 ```
 
 ## 📚 참고 자료
