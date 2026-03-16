@@ -151,8 +151,9 @@ class TestBrainWorker:
 
     def test_brain_worker_initialization(self):
         """Test that BrainWorker can be instantiated."""
-        from src.tiny_moa.cowork.workers.brain_worker import BrainWorker
         import logging
+
+        from src.tiny_moa.cowork.workers.brain_worker import BrainWorker
 
         # Mock dependencies
         mock_brain = MagicMock()
@@ -163,8 +164,9 @@ class TestBrainWorker:
 
     def test_brain_worker_has_execute_method(self):
         """Test that BrainWorker has execute method."""
-        from src.tiny_moa.cowork.workers.brain_worker import BrainWorker
         import logging
+
+        from src.tiny_moa.cowork.workers.brain_worker import BrainWorker
 
         mock_brain = MagicMock()
         logger = logging.getLogger("test")
@@ -179,8 +181,9 @@ class TestToolWorker:
 
     def test_tool_worker_initialization(self):
         """Test that ToolWorker can be instantiated."""
-        from src.tiny_moa.cowork.workers.tool_worker import ToolWorker
         import logging
+
+        from src.tiny_moa.cowork.workers.tool_worker import ToolWorker
 
         mock_orchestrator = MagicMock()
         logger = logging.getLogger("test")
@@ -190,8 +193,9 @@ class TestToolWorker:
 
     def test_tool_worker_has_execute_method(self):
         """Test that ToolWorker has execute method."""
-        from src.tiny_moa.cowork.workers.tool_worker import ToolWorker
         import logging
+
+        from src.tiny_moa.cowork.workers.tool_worker import ToolWorker
 
         mock_orchestrator = MagicMock()
         logger = logging.getLogger("test")

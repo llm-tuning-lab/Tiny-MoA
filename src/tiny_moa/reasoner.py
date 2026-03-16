@@ -6,12 +6,12 @@ Reasoner 모델 래퍼 (Falcon-H1-Tiny-R-0.6B)
 - LiveCodeBench 39% + MATH500 94%
 """
 
+import logging
 import os
 from pathlib import Path
 from typing import Optional
 
 from llama_cpp import Llama
-import logging
 
 logger = logging.getLogger(__name__)
 

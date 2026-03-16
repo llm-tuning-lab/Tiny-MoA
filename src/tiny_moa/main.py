@@ -5,8 +5,8 @@ python -m tiny_moa.main [--interactive]
 """
 
 import argparse
-import warnings
 import logging
+import warnings
 
 logger = logging.getLogger(__name__)
 

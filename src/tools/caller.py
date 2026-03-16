@@ -5,12 +5,12 @@ Falcon-H1-Tiny-Tool-Calling-90M + LFM2.5 검증 파이프라인
 """
 
 import json
+import logging
 import os
 from pathlib import Path
 from typing import Optional
 
 from .schema import get_tools_prompt, validate_tool_call
-import logging
 
 logger = logging.getLogger(__name__)
 

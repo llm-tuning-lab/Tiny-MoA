@@ -5,6 +5,7 @@ Orchestrates Document Processing (Docling) -> Embedding (Chroma) -> Retrieval
 """
 
 import hashlib
+import logging
 from pathlib import Path
 from typing import List
 
@@ -12,7 +13,6 @@ from src.doc_processing.converter import DoclingConverter
 
 # Internal imports (Lazy loaded components)
 from src.rag.store import LazyVectorStore
-import logging
 
 logger = logging.getLogger(__name__)
 

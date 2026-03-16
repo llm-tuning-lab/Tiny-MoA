@@ -5,9 +5,9 @@ PDF/DOCX 문서를 텍스트로 변환하여 Brain에게 전달
 """
 
 import logging
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
-from pathlib import Path
 
 # Docling imports
 try:
@@ -22,13 +22,14 @@ try:
         PowerpointFormatOption,
         WordFormatOption,
     )
+
     DOCLING_AVAILABLE = True
 except ImportError:
     DOCLING_AVAILABLE = False
     # Define dummy for type hints if needed, or just let it fail at runtime
     if not DOCLING_AVAILABLE:
-         logging.warning("Docling not installed. DoclingConverter will fail.")
-         DocumentConverter = None  # type: ignore
+        logging.warning("Docling not installed. DoclingConverter will fail.")
+        DocumentConverter = None  # type: ignore
 
 
 class DoclingConverter:
@@ -44,8 +45,8 @@ class DoclingConverter:
     def _create_converter(self) -> DocumentConverter:
         """변환기 초기화 (Fast Mode 최적화)"""
         pipeline_options = PdfPipelineOptions()
-        pipeline_options.do_ocr = False # OCR 끄기 (속도 향상)
-        pipeline_options.do_table_structure = True # 표 구조 분석
+        pipeline_options.do_ocr = False  # OCR 끄기 (속도 향상)
+        pipeline_options.do_table_structure = True  # 표 구조 분석
 
         if self.high_speed:
             # Fast Mode: 이미지 생성 끄고 저해상도 처리
@@ -61,8 +62,7 @@ class DoclingConverter:
         if self.high_speed:
             try:
                 pdf_format_option = PdfFormatOption(
-                    pipeline_options=pipeline_options,
-                    backend=PyPdfiumDocumentBackend
+                    pipeline_options=pipeline_options, backend=PyPdfiumDocumentBackend
                 )
             except ImportError:
                 logger.info("Warning: PyPdfiumDocumentBackend not found using default.")
@@ -107,9 +107,11 @@ class DoclingConverter:
 
         return md_text
 
+
 if __name__ == "__main__":
     # Test
     import sys
+
     if len(sys.argv) > 1:
         converter = DoclingConverter(high_speed=True)
         print(converter.convert(sys.argv[1])[:500] + "...")  # noqa

@@ -5,10 +5,10 @@ Planner Agent
 Brain 모델을 사용하여 JSON 형식의 계획을 생성합니다.
 """
 
+import logging
 from typing import List
 
 from src.tiny_moa.brain import Brain
-import logging
 
 logger = logging.getLogger(__name__)
 

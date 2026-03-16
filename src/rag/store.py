@@ -5,9 +5,9 @@ Lazy loading wrapper for ChromaDB to minimize startup overhead.
 """
 
 import logging
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
-from pathlib import Path
 
 
 class LazyVectorStore:
