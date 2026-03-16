@@ -34,7 +34,13 @@
 
 ---
 
-## 🚀 빠른 시작
+## 🚀 설치
+
+### 사전 요구사항
+
+- Python 3.10+
+- 16GB+ RAM (CPU 전용 실행)
+- huggingface-cli (모델 다운로드용)
 
 ### 1. 저장소 클론
 
@@ -48,6 +54,9 @@ cd Tiny-MoA
 ```powershell
 # Windows PowerShell
 powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
+
+# macOS/Linux
+curl -LsSf https://astral.sh/uv/install.sh | sh
 
 # 설치 확인
 uv --version
@@ -73,7 +82,13 @@ huggingface-cli download LiquidAI/LFM2.5-1.2B-Thinking-GGUF \
 # Reasoner (Falcon-R-0.6B)
 huggingface-cli download tiiuae/Falcon-H1-Tiny-R-0.6B-GGUF \
     --include "*Q4_K_M.gguf" --local-dir ./models/reasoner
+
+# Tool Caller (Falcon-Tool-Calling-90M)
+huggingface-cli download tiiuae/Falcon-H1-Tiny-Tool-Calling-90M-GGUF \
+    --include "*Q4_K_M.gguf" --local-dir ./models/tool_caller
 ```
+
+## 🚀 빠른 시작
 
 ---
 
@@ -228,6 +243,45 @@ Tiny-MoA/
 
 ---
 
+## 📚 API 문서
+
+### 핵심 모듈
+
+| 모듈 | 위치 | 설명 |
+|------|------|------|
+| **orchestrator** | `src/tiny_moa/orchestrator.py` | 중앙 컨트롤러 (라우팅, 응답 생성) |
+| **brain** | `src/tiny_moa/brain.py` | LFM2.5-1.2B-Thinking 래퍼 |
+| **reasoner** | `src/tiny_moa/reasoner.py` | Falcon-R-0.6B 래퍼 |
+| **tools.executor** | `src/tools/executor.py` | 도구 실행 엔진 (날씨, 검색, 파일) |
+| **translation** | `src/translation/` | 다국어 번역 파이프라인 |
+| **rag.engine** | `src/rag/engine.py` | RAG 엔진 (ChromaDB + sentence-transformers) |
+
+### 주요 함수
+
+```python
+from tiny_moa.orchestrator import Orchestrator
+from tiny_moa.brain import Brain
+from tools.executor import ToolExecutor
+
+# Orchestrator 초기화
+orchestrator = Orchestrator(
+    brain_model_path="./models/brain/model.gguf",
+    reasoner_model_path="./models/reasoner/model.gguf"
+)
+
+# 쿼리 처리
+response = orchestrator.process_query("서울 날씨 어때?")
+print(response)
+
+# Brain 직접 사용
+brain = Brain(model_path="./models/brain/model.gguf")
+intent = brain.analyze_intent("What's the weather in Seoul?")
+
+# Tool 실행
+executor = ToolExecutor()
+result = executor.execute("get_weather", {"location": "Seoul"})
+```
+
 ## 📚 참고 자료
 
 | 모델 | 링크 |
@@ -242,6 +296,58 @@ Tiny-MoA/
 ## 📄 라이선스
 
 이 프로젝트는 **Apache 2.0** 라이선스로 배포됩니다.
+
+---
+
+## 🤝 기여 가이드
+
+### 코드 품질
+
+```bash
+# 린트 검사
+make lint
+
+# 포맷팅
+make format
+
+# 타입 체크
+make type-check
+
+# 전체 검사
+make check
+
+# 테스트 실행
+make test
+
+# 정리
+make clean
+```
+
+### 커밋 컨벤션
+
+```
+feat: 새로운 기능 추가
+fix: 버그 수정
+docs: 문서 수정
+refactor: 코드 리팩토링
+test: 테스트 추가/수정
+chore: 빌드, 설정 파일 수정
+```
+
+### 새로운 도구 추가
+
+1. **도구 정의**: `src/tools/schema.py`에 Pydantic 스키마 추가
+2. **도구 구현**: `src/tools/executor.py`에 실행 로직 추가
+3. **테스트**: `tests/test_tools.py`에 단위 테스트 추가
+4. **문서화**: README.md 업데이트
+
+### 이슈 리포트
+
+버그 발견 시 다음 정보를 포함해주세요:
+- 재현 단계
+- 예상 동작 vs 실제 동작
+- 환경 정보 (Python 버전, OS, RAM)
+- 관련 로그 또는 에러 메시지
 
 ---
 
