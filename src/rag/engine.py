@@ -103,7 +103,7 @@ class RAGEngine:
                     chunks.append("\n\n".join(current_chunk))
                     current_chunk = []
                     current_len = 0
-                chunks.append(para) # TODO: Better splitting for huge paragraphs
+                chunks.append(para) # TODO(team): Better splitting for huge paragraphs [2026-03]
                 continue
                 
             if current_len + len(para) > chunk_size:
