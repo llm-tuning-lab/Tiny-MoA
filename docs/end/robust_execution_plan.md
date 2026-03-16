@@ -4,7 +4,7 @@
 
 ### 1. 성공 사례 (하지만 개선 필요)
 > **입력**: "uv환경을 지금 프로젝트에 적용했는지 확인해봐."
-- **흐름**: 
+- **흐름**:
   1. Brain이 자연어 명령(`"Check the current..."`) 생성
   2. Orchestrator 방어 로직이 이를 감지하고 차단
   3. 키워드 폴백(`_infer_tool_from_keywords`)이 작동하여 `uv --version` 실행
@@ -48,7 +48,7 @@ Reasoner가 모르는 정보에 대해 환각을 일으키는 대신, 도구 사
 ### 4단계: 자기 수정 루프 (Self-Correction Loop)
 도구 실행이 실패하거나 방어 로직에 걸렸을 때, 자동으로 재시도 시스템을 가동합니다.
 
-- **Scenario**: 
+- **Scenario**:
   1. Brain: "Check uv" (Fail)
   2. System: "Error: Invalid command. Please provide exact shell command."
   3. Brain(Retry): "uv --version" (Success)

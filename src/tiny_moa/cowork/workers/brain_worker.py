@@ -8,7 +8,7 @@ class BrainWorker(BaseWorker):
 
     def execute(self, task_description: str, history: str = "", **kwargs) -> str:
         self.logger.info(f"[{self.name}] Brain processing: {task_description}")
-        
+
         # Prepend history if available to provide context for the Brain
         full_prompt = task_description
         if history:

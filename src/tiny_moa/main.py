@@ -6,6 +6,9 @@ python -m tiny_moa.main [--interactive]
 
 import argparse
 import warnings
+import logging
+
+logger = logging.getLogger(__name__)
 
 # Suppress ResourceWarning: unclosed file <_io.TextIOWrapper ...>
 warnings.filterwarnings("ignore", category=ResourceWarning)
@@ -34,19 +37,19 @@ def main():
   python -m tiny_moa.main --query "피보나치 함수 작성해줘"
         """,
     )
-    
+
     parser.add_argument(
         "--interactive", "-i",
         action="store_true",
         help="대화형 모드 실행",
     )
-    
+
     parser.add_argument(
         "--query", "-q",
         type=str,
         help="단일 쿼리 실행",
     )
-    
+
     parser.add_argument(
         "--thinking",
         action="store_true",
@@ -74,44 +77,44 @@ def main():
         default=4096,
         help="Context Window Size (default: 4096)",
     )
-    
+
     args = parser.parse_args()
-    
+
     if args.interactive:
         interactive_mode()
     elif args.query:
         if not args.tui:
-            print("🌐 Translation Pipeline 활성화")
-            print("🤖 Tiny MoA 초기화 중...")
+            logger.info("🌐 Translation Pipeline 활성화")
+            logger.info("🤖 Tiny MoA 초기화 중...")
         moa = TinyMoA(
-            use_thinking=args.thinking, 
+            use_thinking=args.thinking,
             show_thinking=args.show_thinking,
             n_ctx=args.n_ctx
         )
-        
+
         if args.tui:
             result = moa.run_cowork_flow(args.query)
-            console.print("\n[bold green]✅ Cowork 작업 완료![/bold green]")
-            console.print(Panel(Markdown(result), title="최종 결과 리포트", border_style="green"))
+            console.print("\n[bold green]✅ Cowork 작업 완료![/bold green]")  # noqa
+            console.print(Panel(Markdown(result), title="최종 결과 리포트", border_style="green"))  # noqa
         else:
             moa.chat(args.query)
     else:
-        console.print("[bold]🧪 Tiny MoA 기본 테스트[/bold]\n")
-        
+        console.print("[bold]🧪 Tiny MoA 기본 테스트[/bold]\n")  # noqa
+
         moa = TinyMoA(
-            use_thinking=args.thinking, 
+            use_thinking=args.thinking,
             show_thinking=args.show_thinking,
             n_ctx=args.n_ctx
         )
-        
+
         test_queries = [
             "안녕하세요! 반갑습니다.",
             "피보나치 수열의 10번째 항을 구하는 Python 함수를 작성해줘.",
             "1부터 100까지의 합은?",
         ]
-        
+
         for query in test_queries:
-            console.print(f"\n{'='*60}")
+            console.print(f"\n{'='*60}")  # noqa
             moa.chat(query)
 
 

@@ -34,7 +34,7 @@
 # docling 추가 시
 uv add docling
 
-# RAG 관련 추가 시  
+# RAG 관련 추가 시
 uv add sentence-transformers chromadb
 ```
 

@@ -11,16 +11,16 @@ from typing import Tuple
 
 class SafetyGuard:
     """파괴적 동작 방지 및 샌드박스 검증"""
-    
+
     # 위험한 키워드 (파일명이나 내용이 아니라, 'Action' 이름 기준)
     DANGEROUS_ACTIONS = [
         "delete", "remove", "rm", "rmdir", "unlink",
         "format", "drop", "truncate", "overwrite"
     ]
-    
+
     def __init__(self, sandbox_root: Path):
         self.sandbox_root = sandbox_root.resolve()
-    
+
     def validate_path(self, path: str) -> Tuple[bool, str]:
         """
         경로가 샌드박스 내부에 있는지 확인 (Path Traversal 방지)
@@ -42,16 +42,16 @@ class SafetyGuard:
             (is_safe, message)
         """
         action_lower = action.lower()
-        
+
         # 1. 명시적 위험 키워드 확인
         for danger in self.DANGEROUS_ACTIONS:
             if danger in action_lower:
                 return False, f"⚠️ Dangerous Action Detected: '{danger}'. Confirmation required."
-        
+
         # 2. 경로 검증
         if target_path:
             is_valid_path, msg = self.validate_path(target_path)
             if not is_valid_path:
                 return False, msg
-                
+
         return True, "Safe"

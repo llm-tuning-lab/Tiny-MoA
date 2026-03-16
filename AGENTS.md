@@ -1,7 +1,7 @@
 # Tiny-MoA — AGENTS.md
 
-**Generated:** 2026-03-13  
-**Project:** Tiny MoA v2.1 — CPU-based Mixture of Agents (LFM2.5-1.2B + Falcon-R 600M + Tool Caller 90M)  
+**Generated:** 2026-03-13
+**Project:** Tiny MoA v2.1 — CPU-based Mixture of Agents (LFM2.5-1.2B + Falcon-R 600M + Tool Caller 90M)
 **Stack:** Python 3.10+ / llama-cpp-python / Rich TUI / Pydantic
 
 ---
@@ -67,13 +67,13 @@ Tiny-MoA/
 
 ## CONVENTIONS
 
-**Line length:** 100 chars (ruff)  
-**Target Python:** 3.10+  
-**Lint rules:** E, F, I (E501 ignored)  
-**Package manager:** uv (preferred), pip fallback  
-**Build system:** hatchling  
-**Model format:** GGUF via llama-cpp-python  
-**Language strategy:** English-first (translate input → process in English → translate output)  
+**Line length:** 100 chars (ruff)
+**Target Python:** 3.10+
+**Lint rules:** E, F, I (E501 ignored)
+**Package manager:** uv (preferred), pip fallback
+**Build system:** hatchling
+**Model format:** GGUF via llama-cpp-python
+**Language strategy:** English-first (translate input → process in English → translate output)
 
 ---
 

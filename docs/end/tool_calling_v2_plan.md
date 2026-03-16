@@ -65,7 +65,7 @@ def search_web(query: str, num_results: int = 5) -> dict:
     try:
         with DDGS() as ddgs:
             results = list(ddgs.text(query, max_results=num_results))
-            
+
             return {
                 "query": query,
                 "num_results": len(results),
@@ -105,7 +105,7 @@ for r in result["results"]:
 ```python
 def _handle_tool_call(self, user_input: str, tool_hint: str = "", verbose: bool = True):
     """개선된 Tool 호출 처리"""
-    
+
     # 1단계: tool_hint가 있으면 바로 사용
     if tool_hint:
         tool_call = self._infer_tool_from_keywords(user_input, tool_hint)
@@ -113,14 +113,14 @@ def _handle_tool_call(self, user_input: str, tool_hint: str = "", verbose: bool 
         # 2단계: Falcon-90M으로 JSON 생성 시도
         if self.tool_caller and self.tool_caller._falcon:
             tool_call = self.tool_caller.generate_tool_call(user_input)
-            
+
             # JSON 파싱 실패시 Brain으로 보정
             if "error" in tool_call and self.brain:
                 tool_call = self._correct_with_brain(tool_call["raw"], user_input)
         else:
             # 3단계: 키워드 폴백
             tool_call = self._infer_tool_from_keywords(user_input, "")
-    
+
     # 실행
     return self._execute_tool(tool_call)
 ```
@@ -157,7 +157,7 @@ def search_wikipedia(query: str, lang: str = "en") -> dict:
     Wikipedia 검색 - API 키 불필요!
     """
     import requests
-    
+
     url = f"https://{lang}.wikipedia.org/api/rest_v1/page/summary/{query}"
     try:
         response = requests.get(url, timeout=10)
@@ -184,16 +184,16 @@ def read_url(url: str, max_chars: int = 2000) -> dict:
     import requests
     from html import unescape
     import re
-    
+
     try:
         response = requests.get(url, timeout=15, headers={"User-Agent": "TinyMoA/1.0"})
         response.raise_for_status()
-        
+
         # HTML 태그 제거 (간단한 방식)
         text = re.sub(r'<[^>]+>', ' ', response.text)
         text = unescape(text)
         text = re.sub(r'\s+', ' ', text).strip()
-        
+
         return {
             "url": url,
             "content": text[:max_chars],
@@ -212,7 +212,7 @@ def search_news(query: str, num_results: int = 5) -> dict:
     DuckDuckGo 뉴스 검색
     """
     from duckduckgo_search import DDGS
-    
+
     try:
         with DDGS() as ddgs:
             results = list(ddgs.news(query, max_results=num_results))
@@ -255,7 +255,7 @@ TOOLS = [
         "description": "Calculate a math expression",
         "parameters": {...}
     },
-    
+
     # 새 도구
     {
         "name": "search_web",

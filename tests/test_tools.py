@@ -19,7 +19,7 @@ logging.basicConfig(
 def run_test():
     executor = ToolExecutor()
     print("Test started... check tool_test.log")
-    
+
     tests = [
         ("get_weather", {"location": "Seoul"}),
         ("search_web", {"query": "Python latest version", "num_results": 1}),

@@ -54,13 +54,13 @@ class CoworkFileSkill:
         if tool_name == "workspace_list":
             res = self.workspace.list_files(recursive=args.get("recursive", False))
             return {"success": True, "result": res}
-        
+
         elif tool_name == "workspace_read":
             res = self.workspace.read_file(args.get("filename"))
             return {"success": not res.startswith("Error"), "result": res}
-            
+
         elif tool_name == "workspace_write":
             res = self.workspace.write_file(args.get("filename"), args.get("content"))
             return {"success": not res.startswith("Error"), "result": res}
-            
+
         return {"success": False, "error": f"Unknown tool: {tool_name}"}

@@ -8,19 +8,22 @@ Brain 모델을 사용하여 JSON 형식의 계획을 생성합니다.
 from typing import List
 
 from src.tiny_moa.brain import Brain
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class PlannerAgent:
     def __init__(self, brain: Brain):
         self.brain = brain
-        
+
     def create_plan(self, user_goal: str, context_str: str) -> List[dict]:
         """
         사용자 목표를 분석하여 태스크 리스트 생성
         Returns:
             List[dict]: [{"description": "...", "agent": "..."}]
         """
-        
+
         system_prompt = """You are a Task Planner for an autonomous AI coworker.
 Your job is to break down a complex user goal into a sequence of simple, executable tasks.
 
@@ -85,14 +88,14 @@ Context:
 Goal: "{goal}"
 
 Return ONLY the JSON list. No markdown."""
-        
+
         prompt = system_prompt.format(context=context_str, goal=user_goal)
-        
+
         response = self.brain.direct_respond(prompt, system_prompt="You are a JSON generator.")
-        
+
         # Clean up response
         import json
-        
+
         try:
             # Markdown block removal
             cleaned = response.replace("```json", "").replace("```", "").strip()
@@ -107,29 +110,29 @@ Return ONLY the JSON list. No markdown."""
                 # The 1.2B model sometimes assigns wrong agents.
                 tool_prefixes = ["execute_command", "search_news", "search_web", "get_weather"]
                 office_prefixes = ["create_ppt", "create_word", "create_excel"]
-                
+
                 for task in plan:
                     desc_lower = task.get("description", "").lower().strip()
-                    
+
                     # Force tool agent
                     for prefix in tool_prefixes:
                         if desc_lower.startswith(prefix):
                             task["agent"] = "tool"
                             break
-                    
+
                     # Force office agent
                     for prefix in office_prefixes:
                         if desc_lower.startswith(prefix):
                             task["agent"] = "office"
                             break
-                
+
                 return plan
             else:
-                 # Fallback: create single task
-                 return [{"description": user_goal, "agent": "brain"}]
+                # Fallback: create single task
+                return [{"description": user_goal, "agent": "brain"}]
         except json.JSONDecodeError:
-            print(f"[Planner] Failed to parse plan JSON for goal: {user_goal}")
-            return [{"description": user_goal, "agent": "brain"}] # Fallback
+            logger.warning(f"Failed to parse plan JSON for goal: {user_goal}")
+            return [{"description": user_goal, "agent": "brain"}]  # Fallback
         except Exception as e:
-            print(f"[Planner] Error in planning: {e}")
-            return [{"description": user_goal, "agent": "brain"}] # Fallback
+            logger.error(f"Error in planning: {e}")
+            return [{"description": user_goal, "agent": "brain"}]  # Fallback

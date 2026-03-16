@@ -1,6 +1,6 @@
 # 💾 Tiny-MoA Memory System Plan
 
-> **대화 기록 저장/불러오기 메모리 기능 구현 계획**  
+> **대화 기록 저장/불러오기 메모리 기능 구현 계획**
 > 참고: [Reference/openclaw](../Reference/openclaw/src/memory/)
 
 ---
@@ -114,19 +114,19 @@ class Session:
 class MemoryManager:
     def __init__(self, memory_dir: str = "memory"):
         ...
-    
+
     def save_session(self, messages: list[dict], summary: str = None) -> str:
         """대화 기록을 세션 파일로 저장"""
-    
+
     def load_session(self, session_id: str) -> Session:
         """세션 ID로 대화 기록 로드"""
-    
+
     def search(self, query: str, limit: int = 5) -> list[Session]:
         """키워드 기반 세션 검색"""
-    
+
     def get_recent(self, limit: int = 3) -> list[Session]:
         """최근 세션 조회"""
-    
+
     def get_context(self, session_id: str = None) -> str:
         """현재/이전 세션 컨텍스트 조합"""
 ```
@@ -150,7 +150,7 @@ class MemoryManager:
 ### `memory_search`
 ```python
 {
-    "name": "memory_search", 
+    "name": "memory_search",
     "description": "이전 대화에서 관련 정보 검색",
     "parameters": {
         "query": "검색 키워드",

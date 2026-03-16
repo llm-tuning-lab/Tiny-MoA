@@ -10,7 +10,7 @@ from .translator import GoogleTranslator
 
 __all__ = [
     "detect_language",
-    "is_english", 
+    "is_english",
     "GoogleTranslator",
     "TranslationPipeline",
 ]

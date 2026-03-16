@@ -59,7 +59,7 @@ docs/cowork_result.md
 
 # Note: uv.lock은 GitHub에 올림 (의존성 잠금 파일)
 
-#tests 
+#tests
 #tests/
 1706.03762v7-split.pdf
 rag_storage/

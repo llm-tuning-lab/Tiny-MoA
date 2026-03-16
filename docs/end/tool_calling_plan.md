@@ -122,7 +122,7 @@ src/tiny_moa/
 ### 입력: "서울 날씨는?"
 
 1. **Brain 라우팅**: `{"route": "TOOL", "tool_hint": "weather"}`
-2. **Tool Caller 호출**: 
+2. **Tool Caller 호출**:
    ```json
    {"name": "get_weather", "arguments": {"location": "Seoul"}}
    ```

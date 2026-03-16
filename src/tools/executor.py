@@ -19,12 +19,12 @@ def get_weather(location: str, unit: str = "celsius", **kwargs) -> dict[str, Any
     import time
 
     import requests
-    
+
     try:
         # wttr.in API 호출 (JSON 형식)
         # [Fix] "Seoul weather" 처럼 넘어오는 경우 "weather" 제거
         clean_loc = location.lower().replace("weather", "").replace("날씨", "").strip()
-        
+
         # [Fix] 만약 location이 문장형(공백 포함)이라면 도시명 추출 시도
         # "How is the weather in Seoul?" -> "Seoul"
         import re
@@ -32,16 +32,16 @@ def get_weather(location: str, unit: str = "celsius", **kwargs) -> dict[str, Any
         match = re.search(r"in\s+([a-zA-Z]+)", clean_loc)
         if match:
             clean_loc = match.group(1)
-            
+
         # [Fix] 한글 도시명 -> 영문 변환 (wttr.in 정확도 향상) 및 문장 내 도시 검색
         city_map = {
-            "서울": "Seoul", "도쿄": "Tokyo", "런던": "London", 
+            "서울": "Seoul", "도쿄": "Tokyo", "런던": "London",
             "광주": "Gwangju", "부산": "Busan", "인천": "Incheon",
             "대구": "Daegu", "대전": "Daejeon", "파리": "Paris",
             "뉴욕": "New York", "베이징": "Beijing", "제주": "Jeju",
             "청주": "Cheongju", "울산": "Ulsan", "수원": "Suwon"
         }
-        
+
         # 문장 내에 city_map 키가 있는지 확인
         found_city = False
         for k, v in city_map.items():
@@ -53,14 +53,14 @@ def get_weather(location: str, unit: str = "celsius", **kwargs) -> dict[str, Any
                 clean_loc = v
                 found_city = True
                 break
-        
+
         if not found_city:
             # Fallback: 공백으로 나누고 마지막 단어 (보통 "Seoul" 위치) 시도, 혹은 cleaning된 것 사용
             if len(clean_loc.split()) > 1:
                 # "Check Seoul" -> "Seoul"
                 clean_loc = clean_loc.split()[-1]
 
-        if not clean_loc: 
+        if not clean_loc:
             clean_loc = location # 다 지워졌으면 원본 사용
 
         # Retry Logic
@@ -75,9 +75,9 @@ def get_weather(location: str, unit: str = "celsius", **kwargs) -> dict[str, Any
                 response = requests.get(url, timeout=10, headers=headers)
                 response.raise_for_status()
                 data = response.json()
-                
+
                 current = data["current_condition"][0]
-                
+
                 # 온도 단위 처리
                 if unit == "fahrenheit":
                     temp = current["temp_F"]
@@ -85,7 +85,7 @@ def get_weather(location: str, unit: str = "celsius", **kwargs) -> dict[str, Any
                 else:
                     temp = current["temp_C"]
                     unit_symbol = "°C"
-                
+
                 return {
                     "location": location,
                     "temperature": f"{temp}{unit_symbol}",
@@ -99,7 +99,7 @@ def get_weather(location: str, unit: str = "celsius", **kwargs) -> dict[str, Any
                 if attempt == max_retries - 1:
                     raise e
                 time.sleep(2) # Wait before retry
-                
+
     except (requests.exceptions.RequestException, KeyError, IndexError, ValueError) as e:
         # [Graceful Fail] If extraction failed and API failed, return helpful error
         return {"error": f"Could not find weather for '{location}'. Try specifying a city name (e.g. 'Seoul'). Debug: {str(e)}"}
@@ -110,13 +110,13 @@ def search_web(query: str, num_results: int = 5, **kwargs) -> dict[str, Any]:
     DuckDuckGo 웹 검색 - API 키 불필요!
     """
     from duckduckgo_search import DDGS
-    
+
     # [Fix] 한국어 쿼리인 경우 'kr-kr' 리전 강제 사용
     # 중국어 스팸 방지 및 한국어 결과 우선
     region = "wt-wt" # World-wide default
     if re.search(r'[가-힣]', query):
         region = "kr-kr"
-    
+
     filtered_results = []
     # 중국어 스팸 도메인 강력 차단
     blocked_domains = ['zhihu.com', 'baidu.com', '163.com', 'sohu.com', 'weibo.com', 'csdn.net', 'bilibili.com', 'aliyun.com']
@@ -129,16 +129,16 @@ def search_web(query: str, num_results: int = 5, **kwargs) -> dict[str, Any]:
             except Exception:
                  # kr-kr 실패시 wt-wt로 재시도
                  raw_results = list(ddgs.text(query, region="wt-wt", max_results=num_results + 5))
-            
+
             for r in raw_results:
                 url = r.get('href', '').lower()
                 title = r.get('title', '')
                 body = r.get('body', '')
-                
+
                 # 도메인 차단
                 if any(d in url for d in blocked_domains):
                     continue
-                
+
                 # [Content Filter] 제목이나 내용에 중국어가 포함되면 제외 (한국어 쿼리인데 중국어 나오는 경우)
                 if region == "kr-kr" and (re.search(r'[\u4e00-\u9fff]', title) or re.search(r'[\u4e00-\u9fff]', body)):
                     # 단, 한자가 조금 섞인 것은 허용하되, 주로 중국어인 경우 필터링 필요.
@@ -148,7 +148,7 @@ def search_web(query: str, num_results: int = 5, **kwargs) -> dict[str, Any]:
                 filtered_results.append(r)
                 if len(filtered_results) >= num_results:
                     break
-            
+
             # [Smart Fallback] If web search specifically failed (e.g. all blocked) but query looks like news,
             # try search_news and map to web format.
             if not filtered_results and "news" in query.lower():
@@ -171,9 +171,9 @@ def search_web(query: str, num_results: int = 5, **kwargs) -> dict[str, Any]:
                         }
                 except Exception:
                     pass # Fallback failed, just return empty
-            
+
             results = filtered_results
-            
+
             return {
                 "query": query,
                 "region": region,
@@ -197,12 +197,12 @@ def search_news(query: str, num_results: int = 5, **kwargs) -> dict[str, Any]:
     DuckDuckGo 뉴스 검색
     """
     from duckduckgo_search import DDGS
-    
+
     # [Fix] 뉴스 검색도 언어 감지 적용
     region = "us-en"
     if re.search(r'[가-힣]', query):
         region = "kr-kr"
-    
+
     filtered_results = []
     blocked_domains = ['zhihu.com', 'baidu.com', '163.com', 'sohu.com', 'weibo.com', 'csdn.net']
 
@@ -221,7 +221,7 @@ def search_news(query: str, num_results: int = 5, **kwargs) -> dict[str, Any]:
                 filtered_results.append(r)
                 if len(filtered_results) >= num_results:
                     break
-            
+
             results = filtered_results
             return {
                 "query": query,
@@ -249,10 +249,10 @@ def search_wikipedia(query: str, lang: str = "en", **kwargs) -> dict[str, Any]:
     import urllib.parse
 
     import requests
-    
+
     encoded_query = urllib.parse.quote(query)
     url = f"https://{lang}.wikipedia.org/api/rest_v1/page/summary/{encoded_query}"
-    
+
     try:
         response = requests.get(url, timeout=10, headers={"User-Agent": "TinyMoA/1.0"})
         if response.status_code == 200:
@@ -276,22 +276,22 @@ def read_url(url: str, max_chars: int = 2000, **kwargs) -> dict[str, Any]:
     from html import unescape
 
     import requests
-    
+
     try:
         response = requests.get(
-            url, 
-            timeout=15, 
+            url,
+            timeout=15,
             headers={"User-Agent": "TinyMoA/1.0 (Web Reader)"}
         )
         response.raise_for_status()
-        
+
         # HTML 태그 제거 (간단한 방식)
         text = re.sub(r'<script[^>]*>.*?</script>', '', response.text, flags=re.DOTALL)
         text = re.sub(r'<style[^>]*>.*?</style>', '', text, flags=re.DOTALL)
         text = re.sub(r'<[^>]+>', ' ', text)
         text = unescape(text)
         text = re.sub(r'\s+', ' ', text).strip()
-        
+
         return {
             "url": url,
             "content": text[:max_chars],
@@ -306,12 +306,12 @@ def read_url(url: str, max_chars: int = 2000, **kwargs) -> dict[str, Any]:
 def execute_command(command: str, timeout: int = 30, **kwargs) -> dict[str, Any]:
     """
     터미널 명령어 실행 (Windows/Linux 호환)
-    
+
     주의: 보안상 위험할 수 있음. 신뢰할 수 있는 명령만 실행.
     """
     import platform
     import subprocess
-    
+
     # 위험한 명령어 차단
     dangerous_patterns = [
         "rm -rf", "del /s /q", "format", "mkfs",
@@ -320,7 +320,7 @@ def execute_command(command: str, timeout: int = 30, **kwargs) -> dict[str, Any]
         "chmod 777", "chmod -R",
         "curl | sh", "wget | sh",
     ]
-    
+
     cmd_lower = command.lower()
     for pattern in dangerous_patterns:
         if pattern.lower() in cmd_lower:
@@ -328,7 +328,7 @@ def execute_command(command: str, timeout: int = 30, **kwargs) -> dict[str, Any]
                 "error": f"Blocked dangerous command pattern: {pattern}",
                 "command": command
             }
-    
+
     try:
         # 플랫폼에 따른 셸 설정
         if platform.system() == "Windows":
@@ -344,7 +344,7 @@ def execute_command(command: str, timeout: int = 30, **kwargs) -> dict[str, Any]
                      command = cmd_stripped.replace("ls -R", "dir /s").replace("ls", "dir") # Fallback safety
                 else:
                      command = cmd_stripped.replace("ls", "dir")
-            
+
             result = subprocess.run(
                 command,
                 shell=True,
@@ -362,7 +362,7 @@ def execute_command(command: str, timeout: int = 30, **kwargs) -> dict[str, Any]
                 text=True,
                 timeout=timeout
             )
-        
+
         return {
             "command": command,
             "stdout": result.stdout[:5000] if result.stdout else "",
@@ -389,7 +389,7 @@ def calculate(expression: str, **kwargs) -> dict[str, Any]:
             "result": None,
             "error": "Invalid characters in expression. Only numbers and basic operators allowed."
         }
-    
+
     try:
         # 안전한 eval (빌트인 함수 비활성화)
         result = eval(expression, {"__builtins__": {}}, {})
@@ -411,13 +411,13 @@ def get_current_time(timezone: str = "UTC", **kwargs) -> dict[str, Any]:
     현재 시간 조회
     """
     from datetime import timezone as dt_timezone
-    
+
     try:
         if timezone.upper() == "UTC":
             tz = dt_timezone.utc
         else:
             tz = ZoneInfo(timezone)
-            
+
         now = datetime.now(tz)
         return {
             "timezone": timezone,
@@ -440,11 +440,11 @@ def get_current_time(timezone: str = "UTC", **kwargs) -> dict[str, Any]:
 # Office 문서 생성 도구
 # =============================================================================
 
-def create_ppt(title: str, subtitle: str = "", slides: list = None, 
+def create_ppt(title: str, subtitle: str = "", slides: list = None,
                output_path: str = "presentation.pptx", output_dir: str = "output", **kwargs) -> dict[str, Any]:
     """
     PowerPoint 프레젠테이션 생성
-    
+
     Args:
         title: 발표 제목
         subtitle: 부제목
@@ -466,11 +466,11 @@ def create_ppt(title: str, subtitle: str = "", slides: list = None,
         return {"success": False, "error": str(e)}
 
 
-def create_word(title: str, sections: list = None, 
+def create_word(title: str, sections: list = None,
                 output_path: str = "report.docx", output_dir: str = "output", **kwargs) -> dict[str, Any]:
     """
     Word 보고서 생성
-    
+
     Args:
         title: 문서 제목
         sections: 섹션 목록 [{"heading": "...", "content": "..."}]
@@ -490,11 +490,11 @@ def create_word(title: str, sections: list = None,
         return {"success": False, "error": str(e)}
 
 
-def create_excel(data: list, output_path: str = "data.xlsx", 
+def create_excel(data: list, output_path: str = "data.xlsx",
                  sheet_name: str = "Data", output_dir: str = "output", **kwargs) -> dict[str, Any]:
     """
     Excel 스프레드시트 생성
-    
+
     Args:
         data: 데이터 목록 [{"col1": "val1", "col2": "val2"}, ...]
         output_path: 파일명
@@ -516,7 +516,7 @@ def create_excel(data: list, output_path: str = "data.xlsx",
 
 class ToolExecutor:
     """Tool 실행 관리자"""
-    
+
     def __init__(self):
         # 이름 → 함수 매핑
         self.tools: dict[str, Callable] = {
@@ -533,15 +533,15 @@ class ToolExecutor:
             "create_word": create_word,
             "create_excel": create_excel,
         }
-    
+
     def execute(self, tool_name: str, arguments: dict[str, Any]) -> dict[str, Any]:
         """
         Tool 실행
-        
+
         Args:
             tool_name: 도구 이름
             arguments: 도구 인자
-            
+
         Returns:
             실행 결과 (dict)
         """
@@ -550,7 +550,7 @@ class ToolExecutor:
                 "error": f"Unknown tool: {tool_name}",
                 "available_tools": list(self.tools.keys())
             }
-        
+
         try:
             result = self.tools[tool_name](**arguments)
             return {
@@ -566,11 +566,11 @@ class ToolExecutor:
                 "arguments": arguments,
                 "error": str(e)
             }
-    
+
     def execute_from_json(self, tool_call_json: str) -> dict[str, Any]:
         """
         JSON 문자열에서 Tool 호출 파싱 및 실행
-        
+
         Args:
             tool_call_json: {"name": "tool_name", "arguments": {...}} 형식
         """
@@ -588,38 +588,38 @@ class ToolExecutor:
 
 if __name__ == "__main__":
     executor = ToolExecutor()
-    
-    print("=== Tool Executor 테스트 ===\n")
-    
+
+    print("=== Tool Executor 테스트 ===\n")  # noqa
+
     # 1. 날씨
-    print("\n[1] 날씨 조회:")
-    print(executor.execute("get_weather", {"location": "Seoul"}))
-    
+    print("\n[1] 날씨 조회:")  # noqa
+    print(executor.execute("get_weather", {"location": "Seoul"}))  # noqa
+
     # 2. 웹 검색 (DuckDuckGo)
-    print("\n[2] 웹 검색 (Python):")
+    print("\n[2] 웹 검색 (Python):")  # noqa
     # 실제 검색이 되므로 1개만 요청
-    print(executor.execute("search_web", {"query": "Python latest version", "num_results": 1}))
-    
+    print(executor.execute("search_web", {"query": "Python latest version", "num_results": 1}))  # noqa
+
     # 3. 뉴스 검색
-    print("\n[3] 뉴스 검색 (AI):")
-    print(executor.execute("search_news", {"query": "Artificial Intelligence", "num_results": 1}))
-    
+    print("\n[3] 뉴스 검색 (AI):")  # noqa
+    print(executor.execute("search_news", {"query": "Artificial Intelligence", "num_results": 1}))  # noqa
+
     # 4. 위키피디아
-    print("\n[4] 위키피디아 (알베르트 아인슈타인):")
-    print(executor.execute("search_wikipedia", {"query": "Albert Einstein", "lang": "en"}))
-    
+    print("\n[4] 위키피디아 (알베르트 아인슈타인):")  # noqa
+    print(executor.execute("search_wikipedia", {"query": "Albert Einstein", "lang": "en"}))  # noqa
+
     # 5. URL 읽기 (python.org 예시)
-    print("\n[5] URL 읽기 (python.org):")
-    print(executor.execute("read_url", {"url": "https://www.python.org", "max_chars": 500}))
+    print("\n[5] URL 읽기 (python.org):")  # noqa
+    print(executor.execute("read_url", {"url": "https://www.python.org", "max_chars": 500}))  # noqa
 
     # 6. 명령어 실행 (Windows 버전 확인)
-    print("\n[6] 명령어 실행 (ver):")
-    print(executor.execute("execute_command", {"command": "ver"})) # Windows version command
-    
+    print("\n[6] 명령어 실행 (ver):")  # noqa
+    print(executor.execute("execute_command", {"command": "ver"})) # Windows version command  # noqa
+
     # 7. 계산
-    print("\n[7] 계산:")
-    print(executor.execute("calculate", {"expression": "2 + 3 * 4"}))
-    
+    print("\n[7] 계산:")  # noqa
+    print(executor.execute("calculate", {"expression": "2 + 3 * 4"}))  # noqa
+
     # 8. 현재 시간
-    print("\n[8] 현재 시간:")
-    print(executor.execute("get_current_time", {"timezone": "Asia/Seoul"}))
+    print("\n[8] 현재 시간:")  # noqa
+    print(executor.execute("get_current_time", {"timezone": "Asia/Seoul"}))  # noqa

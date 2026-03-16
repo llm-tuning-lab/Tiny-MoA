@@ -1,7 +1,7 @@
 # Tiny MoA (Mixture of Agents) PoC 상세 명세서
 
-> **작성일:** 2026년 1월 23일  
-> **프로젝트명:** Tiny MoA (Mixture of Agents) Proof of Concept  
+> **작성일:** 2026년 1월 23일
+> **프로젝트명:** Tiny MoA (Mixture of Agents) Proof of Concept
 > **목표:** 4B 모델 하나를 띄우는 것보다 효율적으로, 1.2B "Brain" 모델과 90M~600M급 "Specialist" 모델들을 조합하여 더 나은 성능을 달성하는 아키텍처 설계 및 구현
 
 ---
@@ -372,7 +372,7 @@ dependencies = [
        def __init__(self, config: dict):
            self.brain = self._load_brain()
            self.specialists = self._load_specialists()
-       
+
        def route_and_execute(self, user_input: str) -> str:
            plan = self.brain.plan(user_input)
            results = [self.specialists[a].execute(a.prompt) for a in plan.agents]

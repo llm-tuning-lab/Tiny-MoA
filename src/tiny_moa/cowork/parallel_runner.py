@@ -32,7 +32,7 @@ class ParallelRunner:
         future_to_task = {
             self.executor.submit(execute_fn, task): task for task in tasks
         }
-        
+
         final_results = {}
         for future in concurrent.futures.as_completed(future_to_task):
             task = future_to_task[future]

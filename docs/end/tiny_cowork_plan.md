@@ -51,23 +51,23 @@ Claude Cowork는 개발자가 아닌 일반 사용자도 Claude Code처럼 에�
 ```python
 class WorkspaceContext:
     """사용자가 지정한 폴더의 파일 접근 관리"""
-    
+
     def __init__(self, folder_path: str):
         self.folder_path = Path(folder_path)
         self.allowed_extensions = ['.txt', '.md', '.json', '.csv', '.py']
-    
+
     def read_file(self, filename: str) -> str:
         """파일 읽기 (샌드박스 내부만)"""
         pass
-    
+
     def write_file(self, filename: str, content: str) -> bool:
         """파일 쓰기 (확인 후)"""
         pass
-    
+
     def list_files(self) -> list[str]:
         """폴더 내 파일 목록"""
         pass
-    
+
     def create_file(self, filename: str, content: str) -> bool:
         """새 파일 생성"""
         pass
@@ -97,16 +97,16 @@ class CoworkTask:
 
 class TaskQueue:
     """병렬 태스크 처리 큐"""
-    
+
     def __init__(self, max_workers: int = 3):
         self.queue = Queue()
         self.workers = []
         self.max_workers = max_workers
-    
+
     def add_task(self, task: CoworkTask):
         """태스크 추가 (사용자가 여러 개 계속 추가 가능)"""
         self.queue.put(task)
-    
+
     def process_tasks(self):
         """병렬로 태스크 처리"""
         pass
@@ -150,19 +150,19 @@ class TaskQueue:
 ```python
 class SafetyGuard:
     """파괴적 동작 방지"""
-    
+
     DANGEROUS_ACTIONS = [
         "delete", "remove", "rm", "rmdir",
         "format", "drop", "truncate"
     ]
-    
+
     def check_action(self, action: str) -> tuple[bool, str]:
         """위험한 동작 감지 및 확인 요청"""
         for danger in self.DANGEROUS_ACTIONS:
             if danger in action.lower():
                 return False, f"⚠️ '{danger}' 동작 감지. 계속하시겠습니까?"
         return True, ""
-    
+
     def require_confirmation(self, action: str) -> bool:
         """사용자 확인 요청"""
         print(f"🔒 확인 필요: {action}")
