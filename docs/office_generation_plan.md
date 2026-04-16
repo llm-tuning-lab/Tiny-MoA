@@ -1,6 +1,6 @@
 # 📄 Tiny-MoA Office Document Generation Plan
 
-> **PPT, Word, Excel 문서 자동 생성 기능 구현 계획**
+> **PPT, Word, Excel 문서 자동 생성 기능 구현 계획**  
 > 참고: [Reference/Gemini-Claw/src/office](../Reference/Gemini-Claw/src/office/)
 
 ---
@@ -46,15 +46,15 @@ class OfficeAgent:
     def __init__(self, output_dir: str = "output"):
         self.output_dir = output_dir
         self.default_font = "Malgun Gothic"  # 한국어 폰트
-
+    
     def create_word_report(
-        self,
-        title: str,
+        self, 
+        title: str, 
         sections: list[dict],  # [{"heading": "...", "content": "..."}]
         output_path: str
     ) -> str:
         """구조화된 Word 보고서 생성"""
-
+    
     def create_presentation(
         self,
         title: str,
@@ -63,7 +63,7 @@ class OfficeAgent:
         output_path: str
     ) -> str:
         """전문적인 PPT 프레젠테이션 생성"""
-
+    
     def create_excel(
         self,
         data: list[dict],
@@ -71,7 +71,7 @@ class OfficeAgent:
         sheet_name: str = "Data"
     ) -> str:
         """스타일링된 Excel 파일 생성"""
-
+    
     def process_excel(
         self,
         input_path: str,

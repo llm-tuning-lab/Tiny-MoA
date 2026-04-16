@@ -6,15 +6,14 @@ Tiny Cowork TUI Dashboard
 
 import time
 from datetime import datetime
-from typing import List
-
+from typing import List, Optional
 from rich.console import Console
 from rich.layout import Layout
 from rich.live import Live
 from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
-
+from rich.progress import Progress, SpinnerColumn, TextColumn
 
 class CoworkDashboard:
     def __init__(self, goal: str = "Idle"):
@@ -24,9 +23,9 @@ class CoworkDashboard:
         self.tasks = [] # [{"id": "...", "desc": "...", "status": "...", "agent": "..."}]
         self.logs = []
         self.start_time = time.time()
-
+        
         self._setup_layout()
-
+        
     def _setup_layout(self):
         self.layout.split(
             Layout(name="header", size=3),
@@ -37,16 +36,16 @@ class CoworkDashboard:
             Layout(name="task_list", ratio=2),
             Layout(name="agent_logs", ratio=3),
         )
-
+        
     def update_tasks(self, tasks: List[dict]):
         self.tasks = tasks
-
+        
     def add_log(self, message: str, agent: str = "System"):
         timestamp = datetime.now().strftime("%H:%M:%S")
         self.logs.append(f"[{timestamp}] [{agent}] {message}")
         if len(self.logs) > 100: # Increased log capacity further
             self.logs.pop(0)
-
+            
     def _make_header(self) -> Panel:
         grid = Table.grid(expand=True)
         grid.add_column(justify="left", ratio=1)
@@ -63,14 +62,14 @@ class CoworkDashboard:
         table.add_column("Description", ratio=1)
         table.add_column("Agent", style="yellow")
         table.add_column("Status", style="bold")
-
+        
         for t in self.tasks:
             status = t.get("status", "Pending")
             style = "white"
-            if status == "Running": style = "cyan blink"  # noqa: E701
-            elif status == "Completed": style = "green"  # noqa: E701
-            elif status == "Failed": style = "red"  # noqa: E701
-
+            if status == "Running": style = "cyan blink"
+            elif status == "Completed": style = "green"
+            elif status == "Failed": style = "red"
+            
             table.add_row(
                 t.get("id", "N/A"),
                 t.get("desc", "N/A"),
@@ -82,16 +81,16 @@ class CoworkDashboard:
     def _make_logs(self) -> Panel:
         log_text = Text()
         for log in self.logs:
-            if "System" in log: style = "dim"  # noqa: E701
-            elif "Worker" in log: style = "green"  # noqa: E701
-            elif "Planner" in log: style = "yellow"  # noqa: E701
-            elif "Tool" in log: style = "cyan"  # noqa: E701
-            elif "Source" in log: style = "bold white" # Articles  # noqa: E701
-            elif "Error" in log: style = "bold red"  # noqa: E701
-            elif "URL:" in log: style = "blue underline"  # noqa: E701
-            else: style = "white"  # noqa: E701
+            if "System" in log: style = "dim"
+            elif "Worker" in log: style = "green"
+            elif "Planner" in log: style = "yellow"
+            elif "Tool" in log: style = "cyan"
+            elif "Source" in log: style = "bold white" # Articles
+            elif "Error" in log: style = "bold red"
+            elif "URL:" in log: style = "blue underline"
+            else: style = "white"
             log_text.append(log + "\n", style=style)
-
+            
         return Panel(log_text, title="Agent Activity Log", border_style="cyan")
 
     def _make_footer(self) -> Panel:
@@ -115,7 +114,7 @@ def demo_dashboard():
         {"id": "t2", "desc": "Extract code from src/", "status": "Running", "agent": "tool"},
         {"id": "t3", "desc": "Generate Summary", "status": "Pending", "agent": "writer"},
     ])
-
+    
     with Live(dash.generate_layout(), refresh_per_second=4, screen=True) as live:
         for i in range(10):
             dash.add_log(f"Processing chunk {i}...", "Worker")

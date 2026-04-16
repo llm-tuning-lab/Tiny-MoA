@@ -20,7 +20,7 @@ Tiny Cowork를 단순한 모아(MoA)의 확장을 넘어, 병렬 처리와 전�
 - **[Critic] Quality Guard**: 최종 결과물이 사용자의 의도에 맞는지 검토하고 필요시 수정을 요청하는 루프 추가.
 
 ### 3. Modern TUI Dashboard (`src/tiny_moa/ui/dashboard.py`)
-- **Rich-based Interface**:
+- **Rich-based Interface**: 
     - **Task Board**: 현재 진행 중인 할 일 목록과 상태(병렬 진행 상황) 시각화.
     - **Agent Status**: 각 에이전트(Writer, Researcher 등)가 현재 무엇을 '생각'하는지 실시간 로그 출력.
     - **System Health**: 토큰 사용량 및 처리 시간 표시.

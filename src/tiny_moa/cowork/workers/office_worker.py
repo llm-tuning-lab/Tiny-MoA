@@ -5,9 +5,8 @@ Brain이 내용을 생성하고 Office 도구를 호출하는 전문 Worker
 """
 
 import json
-import os
 import re
-
+import os
 from src.tiny_moa.cowork.workers.base import BaseWorker
 
 # [Gemini-Claw Style] Senior Consultant Persona
@@ -38,20 +37,20 @@ Your goal is to create highly professional, detailed, and insightful documents f
 
 class OfficeWorker(BaseWorker):
     """Office 문서 생성 전문 Worker"""
-
+    
     def __init__(self, name: str, logger, orchestrator):
         super().__init__(name, logger)
         self.orchestrator = orchestrator
-
+    
     def execute(self, task_description: str, **kwargs) -> dict:
         """
         Office 문서 생성 실행
         """
         self.logger.info(f"[{self.name}] Office task: {task_description}")
-
+        
         # 이전 단계의 실행 결과(Context) 가져오기
         context = kwargs.get("context", "")
-
+        
         # [CRITICAL UPDATE] 로컬 프로젝트 정보 자동 주입
         # 사용자가 "우리 프로젝트"라고 했으므로, README.md를 읽어서 컨텍스트에 강제로 추가함
         try:
@@ -64,15 +63,15 @@ class OfficeWorker(BaseWorker):
                     self.logger.info(f"[{self.name}] Auto-loaded README.md into context")
         except Exception as e:
             self.logger.warning(f"[{self.name}] Failed to read README.md: {e}")
-
+        
         try:
             task_lower = task_description.lower()
-
+            
             # 출력 폴더 추출 및 생성
             output_dir = self._get_output_dir(task_description)
             os.makedirs(output_dir, exist_ok=True)
             self.logger.info(f"[{self.name}] Output dir: {output_dir}")
-
+            
             # 문서 유형 결정
             if any(k in task_lower for k in ["ppt", "powerpoint", "발표", "프레젠테이션", "슬라이드"]):
                 return self._create_ppt(task_description, output_dir, context)
@@ -82,13 +81,13 @@ class OfficeWorker(BaseWorker):
                 return self._create_excel(task_description, output_dir, context)
             else:
                 return self._create_all_documents(task_description, output_dir, context)
-
+                
         except Exception as e:
             self.logger.error(f"[{self.name}] Office error: {e}")
             import traceback
             traceback.print_exc()
             return {"success": False, "error": str(e)}
-
+    
     def _get_output_dir(self, task_description: str) -> str:
         """출력 폴더 추출"""
         # | 구분자로 폴더명 추출 (Planner 형식: "create_ppt: 제목 | 폴더")
@@ -98,7 +97,7 @@ class OfficeWorker(BaseWorker):
                 folder = parts[-1].strip()
                 if folder:
                     return folder
-
+        
         # 폴더명 추출 패턴들
         patterns = [
             r"['\"]([a-zA-Z가-힣0-9_-]+)['\"]?\s*(?:폴더|folder|directory)",
@@ -110,7 +109,7 @@ class OfficeWorker(BaseWorker):
             if match:
                 return match.group(1)
         return "output"
-
+    
     def _get_title(self, task_description: str) -> str:
         """제목 추출"""
         # | 구분자로 제목 추출
@@ -121,19 +120,19 @@ class OfficeWorker(BaseWorker):
                 if title_part:
                     return title_part
         return "Tiny-MoA 프로젝트"
-
+    
     def _generate_content_with_brain(self, user_prompt: str, system_prompt: str = OFFICE_SYSTEM_PROMPT) -> str:
         """Brain을 사용하여 내용 생성 (System Prompt 분리)"""
         try:
             if hasattr(self.orchestrator, '_brain') and self.orchestrator._brain:
                 # Brain.direct_respond에 system_prompt 전달
                 response = self.orchestrator._brain.direct_respond(user_prompt, system_prompt=system_prompt)
-
+                
                 # [DEBUG] Brain 응답 로그
                 self.logger.info(f"[{self.name}] Brain Response Length: {len(response) if response else 0}")
                 if response:
                     self.logger.info(f"[{self.name}] Brain Response Preview: {response[:200]}...")
-
+                
                 if response and len(response) > 50:
                     return response
         except Exception as e:
@@ -149,7 +148,7 @@ class OfficeWorker(BaseWorker):
             code_block_match = re.search(r"```json\s*(\{[\s\S]*?\})\s*```", content)
             if code_block_match:
                 return json.loads(code_block_match.group(1))
-
+            
             # 2. 일반 JSON 파싱
             json_match = re.search(r'\{[\s\S]*\}', content)
             if json_match:
@@ -160,13 +159,13 @@ class OfficeWorker(BaseWorker):
             self.logger.error(f"[{self.name}] Failed Content Preview: {content[:500]}")
         except Exception as e:
             self.logger.error(f"[{self.name}] Parse Error: {e}")
-
+            
         return {}
 
     def _create_ppt(self, task_description: str, output_dir: str, context: str = "") -> dict:
         """PPT 생성"""
         title = self._get_title(task_description)
-
+        
         # [Structured Prompt]
         user_prompt = f"""
 [TASK]
@@ -195,17 +194,17 @@ Structure:
 """
 
         content = self._generate_content_with_brain(user_prompt, system_prompt=OFFICE_SYSTEM_PROMPT)
-
+        
         # JSON 파싱
         data = self._parse_json(content)
         if not data or "slides" not in data or not data["slides"]:
             self.logger.warning(f"[{self.name}] Brain failed to generate PPT content. Using fallback.")
             data = self._get_default_ppt_content(title)
-
+        
         # OfficeAgent 사용
         from office.agent import OfficeAgent
         agent = OfficeAgent(workspace_root=".")
-
+        
         output_path = os.path.join(output_dir, "presentation.pptx")
         result = agent.create_presentation(
             title=data.get("title", title),
@@ -213,14 +212,14 @@ Structure:
             slides=data.get("slides", []),
             output_path=output_path
         )
-
+        
         self.logger.info(f"[{self.name}] PPT created: {result.get('path', 'unknown')}")
         return result
-
+    
     def _create_word(self, task_description: str, output_dir: str, context: str = "") -> dict:
         """Word 문서 생성"""
         title = self._get_title(task_description)
-
+        
         # [Structured Prompt]
         user_prompt = f"""
 [TASK]
@@ -255,28 +254,28 @@ Structure:
 
         content = self._generate_content_with_brain(user_prompt, system_prompt=OFFICE_SYSTEM_PROMPT)
         data = self._parse_json(content)
-
+        
         if not data or "sections" not in data or not data["sections"]:
             self.logger.warning(f"[{self.name}] Brain failed to generate Word content. Using fallback.")
             data = self._get_default_word_content(title)
-
+        
         from office.agent import OfficeAgent
         agent = OfficeAgent(workspace_root=".")
-
+        
         output_path = os.path.join(output_dir, "report.docx")
         result = agent.create_word_report(
             title=data.get("title", title),
             sections=data.get("sections", []),
             output_path=output_path
         )
-
+        
         self.logger.info(f"[{self.name}] Word created: {result.get('path', 'unknown')}")
         return result
-
+    
     def _create_excel(self, task_description: str, output_dir: str, context: str = "") -> dict:
         """Excel 생성"""
         title = self._get_title(task_description)
-
+        
         # [Structured Prompt]
         user_prompt = f"""
 [TASK]
@@ -299,40 +298,40 @@ Structure:
 
         content = self._generate_content_with_brain(user_prompt, system_prompt=OFFICE_SYSTEM_PROMPT)
         data = self._parse_json(content)
-
+        
         if not data or "data" not in data or not data["data"]:
             self.logger.warning(f"[{self.name}] Brain failed to generate Excel content. Using fallback.")
             data = self._get_default_excel_content(title)
-
+        
         from office.agent import OfficeAgent
         agent = OfficeAgent(workspace_root=".")
-
+        
         output_path = os.path.join(output_dir, "data.xlsx")
         result = agent.create_excel(
             data=data.get("data", []),
             output_path=output_path,
             sheet_name=data.get("sheet_name", "Data")
         )
-
+        
         self.logger.info(f"[{self.name}] Excel created: {result.get('path', 'unknown')}")
         return result
-
+    
     def _create_all_documents(self, task_description: str, output_dir: str, context: str = "") -> dict:
         """모든 문서 유형 생성"""
         results = {}
         results["ppt"] = self._create_ppt(task_description, output_dir, context)
         results["word"] = self._create_word(task_description, output_dir, context)
         results["excel"] = self._create_excel(task_description, output_dir, context)
-
+        
         return {
             "success": True,
             "output_dir": output_dir,
             "documents": results,
             "message": f"Created PPT, Word, Excel in {output_dir}/"
         }
+    
 
-
-
+    
     def _get_default_ppt_content(self, title: str) -> dict:
         """기본 PPT 내용 (Brain 실패 시 사용)"""
         return {
@@ -386,7 +385,7 @@ Structure:
                 }
             ]
         }
-
+    
     def _get_default_word_content(self, title: str) -> dict:
         """기본 Word 내용 (Brain 실패 시 사용)"""
         return {
@@ -418,7 +417,7 @@ Structure:
                 }
             ]
         }
-
+    
     def _get_default_excel_content(self, title: str) -> dict:
         """기본 Excel 내용 (Brain 실패 시 사용)"""
         return {

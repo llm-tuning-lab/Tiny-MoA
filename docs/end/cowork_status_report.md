@@ -20,10 +20,10 @@
 - **태스크 분해**: Brain(LFM-1.2B)을 사용하여 "폴더 정리해줘" 같은 모호한 명령을 구체적인 JSON 태스크 리스트로 변환.
 
 ### 5. ⚙️ Orchestrator Integration (`src/tiny_moa/orchestrator.py`)
-- **`run_cowork_flow` 구현**:
-    1. 워크스페이스 로드
-    2. 플랜 생성
-    3. 태스크 순차 실행 (Tool, RAG, Brain 연동)
+- **`run_cowork_flow` 구현**: 
+    1. 워크스페이스 로드 
+    2. 플랜 생성 
+    3. 태스크 순차 실행 (Tool, RAG, Brain 연동) 
     4. 최종 결과 통합 보고.
 
 ---

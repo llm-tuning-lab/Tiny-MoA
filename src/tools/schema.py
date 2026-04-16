@@ -162,16 +162,16 @@ def get_tools_prompt() -> str:
     for tool in TOOLS:
         params = tool["parameters"]["properties"]
         required = tool["parameters"].get("required", [])
-
+        
         param_strs = []
         for pname, pinfo in params.items():
             req_mark = "*" if pname in required else ""
             param_strs.append(f"  - {pname}{req_mark}: {pinfo['description']}")
-
+        
         tools_desc.append(
             f"- {tool['name']}: {tool['description']}\n" + "\n".join(param_strs)
         )
-
+    
     return "\n".join(tools_desc)
 
 
@@ -180,19 +180,19 @@ def validate_tool_call(name: str, arguments: dict[str, Any]) -> tuple[bool, str]
     tool = get_tool_by_name(name)
     if not tool:
         return False, f"Unknown tool: {name}"
-
+    
     required = tool["parameters"].get("required", [])
     for req in required:
         if req not in arguments:
             return False, f"Missing required parameter: {req}"
-
+    
     return True, ""
 
 
 if __name__ == "__main__":
-    print("=== Tool Schema ===")  # noqa
-    print(get_tools_prompt())  # noqa
-    print("\n=== Validation Test ===")  # noqa
-    print(validate_tool_call("get_weather", {"location": "Seoul"}))  # noqa
-    print(validate_tool_call("get_weather", {}))  # noqa
-    print(validate_tool_call("unknown_tool", {}))  # noqa
+    print("=== Tool Schema ===")
+    print(get_tools_prompt())
+    print("\n=== Validation Test ===")
+    print(validate_tool_call("get_weather", {"location": "Seoul"}))
+    print(validate_tool_call("get_weather", {}))
+    print(validate_tool_call("unknown_tool", {}))

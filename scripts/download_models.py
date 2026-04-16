@@ -4,6 +4,9 @@
 huggingface-cli를 사용하여 GGUF 모델 다운로드
 """
 
+import subprocess
+import sys
+from pathlib import Path
 
 # 모델 정보
 MODELS = {
@@ -36,12 +39,12 @@ def download_model(model_key: str) -> bool:
         print(f"❌ Unknown model: {model_key}")
         print(f"Available: {', '.join(MODELS.keys())}")
         return False
-
+    
     model = MODELS[model_key]
     print(f"\n📥 Downloading: {model['description']}")
     print(f"   Repo: {model['repo']}")
     print(f"   File: {model['filename']}")
-
+    
     try:
         from huggingface_hub import hf_hub_download
         path = hf_hub_download(
@@ -59,13 +62,13 @@ def download_model(model_key: str) -> bool:
 def download_all():
     """모든 필수 모델 다운로드"""
     required = ["brain", "reasoner"]
-
+    
     print("🚀 Tiny MoA 모델 다운로드")
     print("=" * 50)
-
+    
     for model_key in required:
         download_model(model_key)
-
+    
     print("\n" + "=" * 50)
     print("✅ 필수 모델 다운로드 완료!")
     print("\n선택적 모델:")
@@ -75,7 +78,7 @@ def download_all():
 
 if __name__ == "__main__":
     import argparse
-
+    
     parser = argparse.ArgumentParser(description="Tiny MoA 모델 다운로드")
     parser.add_argument(
         "models",
@@ -87,9 +90,9 @@ if __name__ == "__main__":
         action="store_true",
         help="사용 가능한 모델 목록",
     )
-
+    
     args = parser.parse_args()
-
+    
     if args.list:
         print("사용 가능한 모델:")
         for key, info in MODELS.items():

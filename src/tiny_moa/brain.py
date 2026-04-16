@@ -7,19 +7,18 @@ Brain 모델 래퍼 (LiquidAI LFM2.5-1.2B)
 - 결과 통합
 """
 
-import logging
 import os
 import re
 from pathlib import Path
 from typing import List, Optional
-
 from llama_cpp import Llama
-
+import sys
+import logging
 # Lazy import for translator
-# from deep_translator import GoogleTranslator
+# from deep_translator import GoogleTranslator 
 
 # [Optimization] Silence llama-cpp logs to keep UI clean
-os.environ["LLAMA_CPP_LOG_LEVEL"] = "error"
+os.environ["LLAMA_CPP_LOG_LEVEL"] = "error" 
 logging.getLogger("llama_cpp").setLevel(logging.ERROR)
 
 # LFM2.5 권장 파라미터 (공식 문서: docs.liquid.ai/lfm/inference/llama-cpp)
@@ -59,7 +58,7 @@ Examples:
 
 class Brain:
     """LFM2.5-1.2B 기반 Brain 모델"""
-
+    
     def __init__(
         self,
         model_path: Optional[str] = None,
@@ -76,13 +75,13 @@ class Brain:
         """
         self.use_thinking = use_thinking
         self.params = LFM_THINKING_PARAMS if use_thinking else LFM_INSTRUCT_PARAMS
-
+        
         # 모델 경로 결정
         if model_path is None:
             # 1. 로컬 models/ 폴더 확인
             base_dir = Path(__file__).parent.parent.parent / "models" / "brain"
             gguf_files = list(base_dir.glob("*.gguf")) if base_dir.exists() else []
-
+            
             if gguf_files:
                 model_path = str(gguf_files[0])
             else:
@@ -98,13 +97,13 @@ class Brain:
                         f"huggingface-cli download LiquidAI/LFM2.5-1.2B-Instruct-GGUF LFM2.5-1.2B-Instruct-Q4_K_M.gguf\n"
                         f"Error: {e}"
                     )
-
+        
         # logger.info(f"[Brain] Loading model from: {model_path}") # Removed print to clean UI
-
+        
         # 스레드 수 결정 (CPU 코어의 절반 권장)
         if n_threads is None:
             n_threads = max(1, os.cpu_count() // 2)
-
+        
         self.model = Llama(
             model_path=model_path,
             n_ctx=n_ctx,
@@ -112,9 +111,9 @@ class Brain:
             verbose=False,
         )
         self.n_ctx = n_ctx
-
+        
         # logger.info(f"[Brain] Loaded! (threads={n_threads}, ctx={n_ctx})") # Removed print to clean UI
-
+        
         self._translator = None
 
     @property
@@ -123,21 +122,21 @@ class Brain:
              from deep_translator import GoogleTranslator
              self._translator = GoogleTranslator(source='auto', target='en')
         return self._translator
-
+    
     def get_prompt_prefix(self) -> str:
         """Returns the prompt prefix (e.g. <|startoftext|>)"""
         # llama-cpp-python automatically adds BOS token, so we return empty to avoid duplication
         return ""
-
+    
     def route(self, user_input: str) -> dict:
         """
         사용자 입력을 분석하여 라우팅 결정
-
+        
         Returns:
             {"route": "REASONER" | "DIRECT", "specialist_prompt": str}
         """
         user_lower = user_input.lower()
-
+        
         # [Fast Path 0] 최신 정보 패턴 감지 (TOOL - search_web)
         # 연도(2023~2030), 버전(GPT-5, MoA 2.0, Claude 4), 최신 키워드
         # 지식의 한계를 미리 체크하여 LLM의 잘못된 판단 방지
@@ -145,26 +144,26 @@ class Brain:
         year_pattern = r'(202[3-9]|203[0-9])년?'
         version_pattern = r'(?:gpt|claude|moa|iphone|gemini|llama|mistral|qwen|v\.)[- ]?\d'
         recent_keywords = ["최신", "최근", "latest", "newest", "recent", "올해", "지난주", "어제"]
-
+        
         if re.search(year_pattern, user_input) or re.search(version_pattern, user_lower) or any(k in user_lower for k in recent_keywords):
             return {"route": "TOOL", "specialist_prompt": user_input, "tool_hint": "search_web"}
 
         # [Fast Path 0.1] DIRECT 즉시 라우팅 (인사, 감사, 요약, 번역, 설명, 개념 질문)
         direct_fast = ["안녕", "hello", "hi ", "고마워", "감사", "thanks", "thank you", "반가워", "bye", "안녕히",
-                      "요약해줘", "요약해", "정리해줘", "summarize", "summary", "번역해줘", "translate",
+                      "요약해줘", "요약해", "정리해줘", "summarize", "summary", "번역해줘", "translate", 
                       "설명해줘", "explain", "차이점", "difference"]
-
+        
         # "뭐야", "what is" 패턴: TOOL 키워드 없으면 DIRECT (개념 설명)
         concept_patterns = ["뭐야", "뭘까", "what is", "what's"]
         tool_keywords = ["날씨", "weather", "뉴스", "news", "검색", "search", "시간", "time", "버전", "version"]
-
+        
         if any(k in user_lower for k in direct_fast):
             return {"route": "DIRECT", "specialist_prompt": "", "tool_hint": ""}
-
+        
         # 개념 질문 (뭐야): 기술/도구 관련이면 TOOL(검색), 아니면 DIRECT
         if any(k in user_lower for k in concept_patterns):
             # 기술/도구 명칭이 있으면 검색이 필요 (TOOL)
-            tech_terms = ["uv", "docker", "kubernetes", "npm", "pip", "git", "rust", "cargo",
+            tech_terms = ["uv", "docker", "kubernetes", "npm", "pip", "git", "rust", "cargo", 
                          "langchain", "pytorch", "tensorflow", "react", "vue", "angular"]
             if any(t in user_lower for t in tech_terms) or not any(t in user_lower for t in tool_keywords):
                 # 기술 용어가 있거나, 단순 개념 질문
@@ -173,26 +172,26 @@ class Brain:
                 # 일반 개념 질문 (JSON이 뭐야?)
                 if not any(t in user_lower for t in tool_keywords):
                     return {"route": "DIRECT", "specialist_prompt": "", "tool_hint": ""}
-
+        
         # [Fast Path 0.5] TOOL 즉시 라우팅 (계산)
         calc_keywords = ["더해", "빼줘", "곱해", "나눠", "계산해", "calculate", "+", "-", "*", "/"]
         if any(k in user_lower for k in calc_keywords):
             return {"route": "TOOL", "specialist_prompt": user_input, "tool_hint": "calculate"}
-
+        
 
         # [Fast Path 1] REASONER 즉시 라우팅 (코드, 알고리즘)
-        reasoner_fast = ["함수 작성", "알고리즘 구현", "코드 작성", "피보나치", "fibonacci", "퀵소트", "quicksort",
+        reasoner_fast = ["함수 작성", "알고리즘 구현", "코드 작성", "피보나치", "fibonacci", "퀵소트", "quicksort", 
                         "aime", "문제 풀", "버그 찾", "디버깅", "debug", "최적화해줘", "optimize", "sql 쿼리"]
         if any(k in user_lower for k in reasoner_fast):
             return {"route": "REASONER", "specialist_prompt": user_input, "tool_hint": ""}
-
+        
         # [Fast Path] 키워드 기반 즉시 라우팅 (LLM 호출 전)
         # 명백한 도구 요청("날씨", "버전 확인")은 LLM을 거치지 않고 바로 처리하여 속도/정확도 향상
-
+        
         # 코딩/창작 관련 키워드가 있으면 Fast Path 건너뜀 (REASONER 가능성)
         creation_keywords = ["write", "code", "create", "generate", "function", "script", "class", "impl", "작성", "만들", "구현", "짜줘"]
         is_creation = any(k in user_lower for k in creation_keywords)
-
+        
         if not is_creation:
             # TOOL 키워드 매칭
             fast_tools = {
@@ -202,7 +201,7 @@ class Brain:
                 "execute_command": ["version", "버전", "check", "확인", "실행", "run", "installed", "설치", "status", "환경"],
                 "get_current_time": ["시간", "time", "몇시", "date", "오늘"],
             }
-
+            
             # [Historical Data Fallback]
             # wttr.in은 과거 데이터를 지원하지 않으므로, 과거 관련 키워드가 있으면 검색으로 유도
             historical_keywords = ["yesterday", "last week", "history", "past", "어제", "지난", "과거", "작년"]
@@ -229,7 +228,7 @@ class Brain:
         # 컨텍스트 초기화
         if hasattr(self.model, "reset"):
             self.model.reset()
-
+        
         # ChatML 포맷 수동 구성 (Official Template: <|startoftext|><|im_start|>system...)
         prefix = "" # Automatic BOS
 
@@ -239,7 +238,7 @@ class Brain:
 {user_input}<|im_end|>
 <|im_start|>assistant
 """
-
+        
         output = self.model(
             prompt,
             max_tokens=256,
@@ -250,9 +249,9 @@ class Brain:
             repeat_penalty=self.params["repeat_penalty"],
             echo=False
         )
-
+        
         content = output["choices"][0]["text"].strip()
-
+        
         # JSON 파싱 시도
         try:
             import json
@@ -264,7 +263,7 @@ class Brain:
                 return result
         except (json.JSONDecodeError, ValueError):
             pass
-
+        
         # [Fast Path] DIRECT 키워드 체크 (강력 추천)
         direct_keywords = ["요약", "정리", "설명", "summarize", "explain", "translate", "번역", "안녕", "hello", "hi", "반가워"]
         if any(kw in user_lower for kw in direct_keywords) and not is_creation:
@@ -272,34 +271,34 @@ class Brain:
 
         # REASONER 키워드 (순수 코딩만)
         keywords_reasoner = ["함수", "알고리즘", "수학", "증명", "aime", "fibonacci", "script", "class"]
-
+        
         # 'python'이나 '코드'가 있으면 REASONER 가능성 높음
         if ("python" in user_lower or "코드" in user_lower or "code" in user_lower) and not any(k in user_lower for k in ["version", "check", "확인", "버전", "summarize", "요약"]):
              return {"route": "REASONER", "specialist_prompt": user_input, "tool_hint": ""}
-
+             
         if any(kw in user_lower for kw in keywords_reasoner) and not any(kw in user_lower for kw in direct_keywords):
             return {"route": "REASONER", "specialist_prompt": user_input, "tool_hint": ""}
-
+        
         return {"route": "DIRECT", "specialist_prompt": "", "tool_hint": ""}
-
+    
     def route_pipeline(self, user_input: str) -> list:
         """
         다중 라우팅 파이프라인: 복합 작업을 여러 단계로 분해
-
-        예: "최신 AI 트렌드 검색해서 요약해줘"
-            → [{"route": "TOOL", "tool_hint": "search_web", ...},
+        
+        예: "최신 AI 트렌드 검색해서 요약해줘" 
+            → [{"route": "TOOL", "tool_hint": "search_web", ...}, 
                {"route": "DIRECT", "task": "요약", ...}]
-
+        
         Returns:
             list of routing decisions (순차 실행)
         """
         import re
         user_lower = user_input.lower()
-
+        
         # ============================================
         # [Step 1] 복합 작업 패턴 감지
         # ============================================
-
+        
         # 패턴: "~해서 ~해줘" (검색해서 요약해줘, 찾아서 설명해줘)
         # 주의: 단순 요청("알려줘")과 복합 요청("알려주고 판단해줘")을 구분해야 함
         compound_patterns = [
@@ -315,7 +314,7 @@ class Brain:
             (r'(요약|정리).{0,15}날씨.{0,5}(알려|확인)', 'get_weather', 'with_rag'),
             (r'날씨.{0,5}(알려|도).{0,10}(요약|정리)', 'get_weather', 'with_rag'),
         ]
-
+        
         # 영어 패턴
         compound_patterns_en = [
             (r'search.{0,10}(summarize|explain|translate)', 'search_web', None),
@@ -323,15 +322,15 @@ class Brain:
             (r'weather.{0,10}(need|should|recommend)', 'get_weather', None),
             (r'news.{0,10}(summarize|brief)', 'search_news', None),
         ]
-
+        
         all_patterns = compound_patterns + compound_patterns_en
-
+        
         for pattern, tool_hint, _ in all_patterns:
             match = re.search(pattern, user_lower)
             if match:
                 # 후속 작업 추출
                 follow_up_task = match.group(1) if match.lastindex else "처리"
-
+                
                 # 파이프라인 생성
                 pipeline = [
                     {
@@ -351,7 +350,7 @@ class Brain:
                     }
                 ]
                 return pipeline
-
+        
         # ============================================
         # [Step 2] 복합 패턴 없으면 단일 라우팅
         # ============================================
@@ -367,7 +366,7 @@ class Brain:
         # 컨텍스트 초기화 (필수: 이전 상태가 남으면 decode 에러 발생)
         if hasattr(self.model, "reset"):
             self.model.reset()
-
+        
         # ChatML 포맷 수동 구성
         # User requested specific default prompt: "You are a helpful assistant trained by Liquid AI."
         sys_content = system_prompt or "You are a helpful assistant trained by Liquid AI. Always respond in Korean unless asked otherwise."
@@ -378,7 +377,7 @@ class Brain:
 {user_input}<|im_end|>
 <|im_start|>assistant
 """
-
+        
         # 직접 llm() 호출 (create_chat_completion 대신)
         output = self.model(
             prompt,
@@ -390,9 +389,9 @@ class Brain:
             repeat_penalty=self.params["repeat_penalty"],
             echo=False
         )
-
+        
         return output["choices"][0]["text"].strip()
-
+    
     def integrate_response(self, user_input: str, specialist_output: str) -> str:
         """
         Specialist 출력을 사용자에게 맞게 통합/포맷팅
@@ -403,9 +402,9 @@ class Brain:
             # [Parsing Strategy]
             # input_data might be a single JSON string OR a multi-task Cowork format:
             # "[TASK: ...]\nDATA: {'...'} \n\n [TASK: ...]"
-
+            
             import re
-
+            
             sections = []
             # Check for Cowork format
             if "[TASK:" in specialist_output and "DATA:" in specialist_output:
@@ -418,7 +417,7 @@ class Brain:
                         try:
                             data = eval(data_str)
                             sections.append(data)
-                        except Exception:
+                        except:
                             # If not a valid python dict/json, treat as plain text
                             # (e.g. Brain summary output)
                             if data_str:
@@ -429,15 +428,15 @@ class Brain:
                     data = eval(specialist_output) if "{" in specialist_output else {}
                     if isinstance(data, dict):
                          sections.append(data)
-                except Exception:
+                except:
                     # Treat entire output as text if not JSON
                     sections.append({"type": "text", "content": specialist_output})
 
             # [Deterministic Formatting]
             final_formatted_blocks = []
             for data in sections:
-                if not isinstance(data, dict): continue  # noqa: E701
-
+                if not isinstance(data, dict): continue
+                
                 # Check for plain text wrapper (Brain Summary)
                 if data.get("type") == "text" and "content" in data:
                     # Give it a nice header if it's substantial text
@@ -447,22 +446,22 @@ class Brain:
                     else:
                         final_formatted_blocks.append(content)
                     continue
-
+                
                 # Unwrap 'result' if present (Cowork Tool Result wrapper)
                 # {'success': True, 'tool': 'search_news', 'result': {'results': [...]}}
-                inner = data.get("result", data)
-                if not isinstance(inner, dict): inner = data # Fallback  # noqa: E701
+                inner = data.get("result", data) 
+                if not isinstance(inner, dict): inner = data # Fallback
 
                 # 1. Search/News Results
                 # Check both 'results' (direct) and 'inner["results"]'
                 target_data = inner if "results" in inner else data
-
+                
                 if "results" in target_data and isinstance(target_data["results"], list):
                     block_lines = []
                     # Add query as header if available
                     q = target_data.get("query", "Search Results")
                     block_lines.append(f"### 📰 **{q}**")
-
+                    
                     for item in target_data["results"]:
                         if isinstance(item, dict):
                             title = item.get("title", "No Title")
@@ -470,7 +469,7 @@ class Brain:
                             snippet = item.get("snippet", item.get("description", ""))
                             # Clean snippet
                             snippet = snippet.replace("\n", " ")[:200]
-
+                            
                             # Elegant Markdown Format using Blockquote
                             entry = (
                                 f"> **{title}**\n"
@@ -490,7 +489,7 @@ class Brain:
                     location = target_data.get("location", "City")
                     temp = target_data.get("temperature", "")
                     cond = target_data.get("condition", "")
-
+                    
                     # Modern Card-like Format
                     weather_block = (
                         f"### 🌦️ **{location} Weather**\n"
@@ -499,7 +498,7 @@ class Brain:
                     )
                     final_formatted_blocks.append(weather_block)
                     continue
-
+                
                 # 3. Execute Command Results (stdout/stderr는 번역하지 않고 원문 유지!)
                 # {'command': 'dir /b', 'stdout': '...', 'stderr': '', 'return_code': 0, ...}
                 target_data = inner if "stdout" in inner else data
@@ -510,27 +509,27 @@ class Brain:
                     return_code = target_data.get("return_code", 0)
                     success = target_data.get("success", True)
                     platform = target_data.get("platform", "")
-
+                    
                     # [CRITICAL] stdout/stderr는 기술적 데이터이므로 번역하면 안됨!
                     # 파일명, 폴더명, 명령어 결과는 그대로 유지
-                    cmd_block = "### 💻 **Command Result**\n"
+                    cmd_block = f"### 💻 **Command Result**\n"
                     cmd_block += f"```\n$ {cmd}\n```\n"
-
+                    
                     if stdout:
                         # stdout을 코드 블록으로 감싸서 번역 방지
                         cmd_block += f"**Output:**\n```\n{stdout.strip()}\n```\n"
-
+                    
                     if stderr:
                         cmd_block += f"**Error:**\n```\n{stderr.strip()}\n```\n"
-
+                    
                     status_emoji = "✅" if success else "❌"
                     cmd_block += f"\n{status_emoji} Return Code: {return_code}"
                     if platform:
                         cmd_block += f" | Platform: {platform}"
-
+                    
                     final_formatted_blocks.append(cmd_block)
                     continue
-
+                
                 # 4. Fallback (Generic Dict)
                 fallback_lines = []
                 for k, v in target_data.items():
@@ -554,7 +553,7 @@ class Brain:
 
         # [English-First Strategy]
         # Generate in English first for speed and quality, then translate later.
-
+        
         system_prompt = f"""You are a helpful assistant.
 Your goal is to nicely format the provided data into a readable list.
 
@@ -575,17 +574,17 @@ Your goal is to nicely format the provided data into a readable list.
 {user_input}
 
 [Output]
-"""
+""" 
 
         messages = [
             {"role": "system", "content": "You are a helpful assistant. Output only the formatted list."},
             {"role": "user", "content": system_prompt},
         ]
-
+        
         # [Stability Fix] Reset context
         if hasattr(self.model, "reset"):
             self.model.reset()
-
+        
         # [Performance Optimization] Use INSTRUCT params (Fast, No Thinking)
         # We explicitly use LFM_INSTRUCT_PARAMS here regardless of self.use_thinking
         params = LFM_INSTRUCT_PARAMS.copy()
@@ -595,13 +594,13 @@ Your goal is to nicely format the provided data into a readable list.
         # The 'results' variable is not defined, assuming it should be 'sections' or a similar parsed output
         # Given the instruction, 'results' likely refers to the parsed tool outputs before deterministic formatting.
         # For now, I'll use 'sections' as the closest available parsed data.
-
+        
         # Re-evaluate the LLM call based on the provided snippet and original context
         # The provided snippet seems to replace the existing LLM call entirely.
         # It introduces `self.llm` and `goal` which are not in the original code.
         # To make it syntactically correct and functional, I will adapt it to use `self.model`
         # and `user_input` (as `goal`) and `messages` as defined earlier.
-
+        
         try:
             response = self.model.create_chat_completion(
                 messages=messages, # Use the messages constructed above
@@ -612,21 +611,21 @@ Your goal is to nicely format the provided data into a readable list.
 
             # [Safety Fix] Programmatically append Search/News results to ensure they appear
             # The 1.2B model often hallucinates or skips this data. We force-feed it here.
-            _appendix = []
+            appendix = []
             direct_references = [] # To store formatted references
-
+            
             # Iterate through the parsed sections to find search results
             for res in sections: # Using 'sections' as the source for results
                 # Unwrap 'result' if present (Cowork Tool Result wrapper)
                 inner_res = res.get('result', res)
-
+                
                 # Check if this result has search data (list of items with title/link)
                 # This logic is similar to the deterministic formatting for search results
                 if "results" in inner_res and isinstance(inner_res["results"], list):
                     # Add a header for this specific set of references if needed
                     # task_desc = inner_res.get('query', 'Search Results') # Or from original task if available
                     # appendix.append(f"\n### 🔗 참고 자료: {task_desc}")
-
+                    
                     for item in inner_res["results"][:5]: # Limit to top 5
                         if isinstance(item, dict):
                             title = item.get('title', 'No Title')
@@ -643,23 +642,23 @@ Your goal is to nicely format the provided data into a readable list.
             return content
         except Exception as e:
             return f"Error integrating response: {e}"
-
+    
     def _clean_response(self, text: str) -> str:
         """
         Thinking 모델의 <think>...</think> 태그를 제거하고 실제 응답만 추출합니다.
         태그가 닫히지 않은 경우(토큰 부족 등)에도 생각 부분을 최대한 제거합니다.
         """
         import re
-
+        
         # 1. <think>... </think> 완벽한 태그 제거
         cleaned = re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL).strip()
-
+        
         # 2. 닫는 태그가 잘린 경우 (<think>만 있고 </think>가 없음)
         if "<think>" in cleaned:
             # <think> 이후의 모든 내용을 생각 과정으로 간주하고 제거 (생각만 하다가 끝난 경우, 답변 없음)
             # 답변이 아예 없는 경우가 되므로, 에러 메시지 반환
             return "⚠️ 답변 생성 중 토큰 부족으로 중단되었습니다. (Thinking process truncated)"
-
+            
         return cleaned
 
     def decompose_query(self, user_input: str) -> List[str]:
@@ -681,9 +680,9 @@ Your goal is to nicely format the provided data into a readable list.
         # split by: and, or, vs, comma, ampersand, 'as well as'
         split_pattern = r"\s*(?:, | and | or | vs | & | as well as )\s*"
         parts = re.split(split_pattern, translated, flags=re.IGNORECASE)
-
+        
         entities = []
-
+        
         # Initialize NLTK (Lazy)
         import nltk
         try:
@@ -708,59 +707,59 @@ Your goal is to nicely format the provided data into a readable list.
 
         for part in parts:
             clean_part = part.strip().strip("?.!,")
-            if not clean_part: continue  # noqa: E701
-
+            if not clean_part: continue
+            
             # Tokenize & POS Tag
             try:
                 tokens = nltk.word_tokenize(clean_part)
                 pos_tags = nltk.pos_tag(tokens)
-
+                
                 # Filter Logic: Keep Nouns, Adjectives, Numbers, Foreign words
                 # JJ: Adjective, NN: Noun, CD: Cardinal number, FW: Foreign word
                 valid_tokens = []
                 for word, tag in pos_tags:
-                    # Logic:
+                    # Logic: 
                     # 1. Must be a valid POS (Noun/Adj/Num)
                     # 2. Must NOT be in our functional stopwords list (unless it's a proper noun?)
-
-                    is_content_word = tag.startswith(('NN', 'JJ', 'CD', 'FW'))
-
+                    
+                    is_content_word = tag.startswith(('NN', 'JJ', 'CD', 'FW')) 
+                    
                     if is_content_word:
                         if word.lower() not in search_stopwords:
                             valid_tokens.append(word)
-
+                
                 if valid_tokens:
                     # Reconstruct
                     entity_cand = " ".join(valid_tokens)
                     if len(entity_cand) >= 2:
                         entities.append(entity_cand)
-
+                        
             except Exception as e:
                 logging.error(f"[Brain] NLTK processing failed: {e}")
                 # Fallback to simple strip
                 if len(clean_part) > 2:
                     entities.append(clean_part)
+        
 
 
-
-
+            
         # [Step 3] Post-processing
         # Restore Compare task if needed
         if any(k in translated.lower() for k in ["compare", "difference", "vs", "versus"]):
              if len(entities) >= 2 and "Compare results" not in entities:
                  entities.append("Compare results")
-
+        
         # [Fix] 뉴스 검색 시 각 엔티티에 "news" 키워드 추가
         # "앤트로픽과 OpenAI 최신 뉴스" -> ["Anthropic news", "OpenAI news"]
-        is_news_query = any(k in user_input.lower() or k in translated.lower()
+        is_news_query = any(k in user_input.lower() or k in translated.lower() 
                            for k in ["뉴스", "news", "소식", "기사"])
         if is_news_query and entities:
             entities = [f"{e} latest news" for e in entities if e.lower() not in ["news", "report", "latest", "recent"]]
-
+        
         # [Fix] "report" 같은 액션 키워드는 tool task에서 제외
         action_words = {"report", "write", "summary", "summarize", "organize", "정리", "레포트"}
         entities = [e for e in entities if e.lower() not in action_words]
-
+        
         logging.info(f"[Brain] Decomposition Result: {entities}")
         return entities if entities else [translated]
 
@@ -769,9 +768,9 @@ Your goal is to nicely format the provided data into a readable list.
 
 if __name__ == "__main__":
     # 테스트
-    print("=== Brain 테스트 ===")  # noqa
+    print("=== Brain 테스트 ===")
     brain = Brain()
-
+    
     # 라우팅 테스트
     test_inputs = [
         "피보나치 함수 작성해줘",
@@ -779,9 +778,9 @@ if __name__ == "__main__":
         "1 + 1 = ?",
         "AIME 2024 문제를 풀어봐",
     ]
-
+    
     for inp in test_inputs:
         result = brain.route(inp)
-        print(f"Input: {inp}")  # noqa
-        print(f"Route: {result}")  # noqa
-        print()  # noqa
+        print(f"Input: {inp}")
+        print(f"Route: {result}")
+        print()

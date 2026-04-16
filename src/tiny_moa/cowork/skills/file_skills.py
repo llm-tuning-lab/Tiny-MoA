@@ -4,10 +4,9 @@ Cowork File Skills
 에이전트가 워크스페이스 내에서 파일을 조작할 수 있도록 돕는 툴셋.
 """
 
-from typing import Any, Dict
-
+import os
+from typing import Dict, Any
 from src.tiny_moa.cowork.workspace import WorkspaceContext
-
 
 class CoworkFileSkill:
     def __init__(self, workspace: WorkspaceContext):
@@ -54,13 +53,13 @@ class CoworkFileSkill:
         if tool_name == "workspace_list":
             res = self.workspace.list_files(recursive=args.get("recursive", False))
             return {"success": True, "result": res}
-
+        
         elif tool_name == "workspace_read":
             res = self.workspace.read_file(args.get("filename"))
             return {"success": not res.startswith("Error"), "result": res}
-
+            
         elif tool_name == "workspace_write":
             res = self.workspace.write_file(args.get("filename"), args.get("content"))
             return {"success": not res.startswith("Error"), "result": res}
-
+            
         return {"success": False, "error": f"Unknown tool: {tool_name}"}

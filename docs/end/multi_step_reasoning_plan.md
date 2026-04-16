@@ -30,14 +30,14 @@ context = {}
 for step in plan:
     # Resolve dependencies (e.g., use previous step's output)
     args = resolve_args(step.args, context)
-
+    
     # Execute with Robust Retry
     result = execute_robust(step.tool, args)
-
+    
     # Validation
     if is_soft_error(result):
         result = retry_or_ask_user(step)
-
+        
     context[step.id] = result
 
 final_response = brain.synthesize(context)

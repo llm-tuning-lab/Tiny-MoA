@@ -5,10 +5,9 @@ Parallel Task Runner
 """
 
 import concurrent.futures
-import threading
+from typing import List, Callable, Dict, Any, Optional
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, List, Optional
-
+import threading
 
 @dataclass
 class TaskResult:
@@ -32,7 +31,7 @@ class ParallelRunner:
         future_to_task = {
             self.executor.submit(execute_fn, task): task for task in tasks
         }
-
+        
         final_results = {}
         for future in concurrent.futures.as_completed(future_to_task):
             task = future_to_task[future]

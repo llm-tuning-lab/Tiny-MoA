@@ -5,6 +5,7 @@ Language Detector
 """
 
 import re
+from typing import Optional
 
 # 언어 코드 매핑
 LANGUAGE_NAMES = {
@@ -27,19 +28,19 @@ LANGUAGE_NAMES = {
 def detect_language(text: str) -> str:
     """
     텍스트의 언어를 감지합니다.
-
+    
     Args:
         text: 분석할 텍스트
-
+        
     Returns:
         언어 코드 (예: 'ko', 'en', 'ja')
     """
     if not text or not text.strip():
         return "en"
-
+    
     # 1. langdetect 사용 시도 (정확도 높음)
     try:
-        from langdetect import DetectorFactory, detect
+        from langdetect import detect, DetectorFactory
         # 일관된 결과를 위해 시드 설정
         DetectorFactory.seed = 0
         detected = detect(text)
@@ -51,7 +52,7 @@ def detect_language(text: str) -> str:
         pass
     except Exception:
         pass
-
+    
     # 2. 휴리스틱 폴백 (langdetect 없을 때)
     return _detect_by_unicode(text)
 
@@ -72,7 +73,7 @@ def _detect_by_unicode(text: str) -> str:
     arabic_pattern = re.compile(r'[\u0600-\u06FF]')
     # 태국어
     thai_pattern = re.compile(r'[\u0E00-\u0E7F]')
-
+    
     # 각 패턴 매치 수 계산
     counts = {
         "ko": len(korean_pattern.findall(text)),
@@ -82,7 +83,7 @@ def _detect_by_unicode(text: str) -> str:
         "ar": len(arabic_pattern.findall(text)),
         "th": len(thai_pattern.findall(text)),
     }
-
+    
     # 가장 많이 매치된 언어 선택
     max_lang = max(counts, key=counts.get)
     if counts[max_lang] > 0:
@@ -90,7 +91,7 @@ def _detect_by_unicode(text: str) -> str:
         if counts["ja"] > 0:
             return "ja"
         return max_lang
-
+    
     # 기본값: 영어
     return "en"
 
@@ -98,10 +99,10 @@ def _detect_by_unicode(text: str) -> str:
 def is_english(text: str) -> bool:
     """
     텍스트가 영어인지 확인합니다.
-
+    
     Args:
         text: 확인할 텍스트
-
+        
     Returns:
         영어이면 True
     """
@@ -111,10 +112,10 @@ def is_english(text: str) -> bool:
 def get_language_name(code: str) -> str:
     """
     언어 코드를 이름으로 변환합니다.
-
+    
     Args:
         code: 언어 코드 (예: 'ko')
-
+        
     Returns:
         언어 이름 (예: 'Korean')
     """
@@ -131,9 +132,9 @@ if __name__ == "__main__":
         "Bonjour, comment allez-vous?",
         "Привет, как дела?",
     ]
-
-    print("=== 언어 감지 테스트 ===")  # noqa
+    
+    print("=== 언어 감지 테스트 ===")
     for text in test_texts:
         lang = detect_language(text)
         name = get_language_name(lang)
-        print(f"[{lang}] {name}: {text[:30]}...")  # noqa
+        print(f"[{lang}] {name}: {text[:30]}...")
